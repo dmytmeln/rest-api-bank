@@ -1,48 +1,44 @@
 package bank.model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-@Entity
-@Table(name = "users")
+@Table("users")
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
     private String firstname;
 
-    @Column
     private String lastname;
 
-    @Column
     private String password;
 
-    @Column
     private String email;
 
-    @Column
     private String phoneNumber;
 
-    @Column
-    @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToOne(mappedBy = "user", cascade = {CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.MERGE})
-    @EqualsAndHashCode.Exclude
-    private BankAccount bankAccount;
+    @Builder.Default
+    private Set<BankAccountRef> bankAccountIds = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
