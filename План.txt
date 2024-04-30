@@ -1,48 +1,7 @@
-1. Створити БД Банку: +
-	- Користувач +
-	- Історія транзакцій +
-	- Банк +
+1. Spring Data JDBC
 
-2. Створити веб-сторінку сайту:
-	- Main Page +
-	- Authorization Page (log in + sign up) +
-	- User Profile +
-	- Bank Page: Deposit and Withdrawal +
-	- Transaction History Page +
+2. Postgress
 
-3. Написати програму:
-	- Зібрати проєкт (Embedded Tomcat, Lombok, MySQL) +
-	- Controllers (Servlets)				   +
-	- Model: 
-		- Data Domain + DAO + Mapping          +
-		- Services (Deposit, Withdrawal, etc.) +
-	- View: Jsp +
-	- Filters  +
+3. REST API
 
-4. Добавити зміну користувача +
-
-5. Добавити Spring Core (IoC) +
-
-6. Implement Repository pattern in the project +
-
-7. Delete exceptions from the DAO +
-
-8. Remake services and controlles responsibilities +
-
-9. Use repository in Services instead of DAO +
-
-10. Spring MVC + Spring Boot +
-
-11. Spring Data JPA +
-
-12. DTO +
-
-13. Spring Security +
-
-New Project
-
-14. Spring Data JDBC
-
-15. Postgress
-
-16. REST API
+4. JWT Token Security
