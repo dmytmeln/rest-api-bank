@@ -14,13 +14,13 @@ CREATE TABLE IF NOT EXISTS bank_accounts (
 );
 
 CREATE TABLE IF NOT EXISTS user_bank_account (
-    user_id BIGINT NOT NULL,
-    bank_account_id BIGINT NOT NULL,
+    users BIGINT NOT NULL,
+    bank_account BIGINT NOT NULL,
 
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (bank_account_id) REFERENCES bank_accounts(id),
+    FOREIGN KEY (users) REFERENCES users(id),
+    FOREIGN KEY (bank_account) REFERENCES bank_accounts(id),
 
-    PRIMARY KEY (user_id, bank_account_id)
+    PRIMARY KEY (users, bank_account)
 );
 
 CREATE TABLE IF NOT EXISTS transactions (

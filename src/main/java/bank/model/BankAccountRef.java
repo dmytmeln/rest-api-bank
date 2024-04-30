@@ -3,6 +3,7 @@ package bank.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Data
@@ -11,6 +12,6 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("user_bank_account")
 public class BankAccountRef {
 
-    private Long bankAccountId;
+    private AggregateReference<BankAccount, Long> bankAccount;
 
 }

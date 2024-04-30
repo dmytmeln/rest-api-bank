@@ -38,7 +38,7 @@ public class User implements UserDetails {
     private Role role;
 
     @Builder.Default
-    private Set<BankAccountRef> bankAccountIds = new HashSet<>();
+    private Set<BankAccountRef> bankAccounts = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
