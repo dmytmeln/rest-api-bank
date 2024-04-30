@@ -1,7 +1,8 @@
 package bank.model;
 
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,23 +11,18 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "bank_accounts")
+@Table("bank_accounts")
 public class BankAccount {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
     @Builder.Default
     private Double balance = 0D;
 
-    @OneToOne(cascade = {CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.MERGE}, optional = false)
     @EqualsAndHashCode.Exclude
     private User user;
 
-    @OneToMany(mappedBy = "bankAccount", cascade = CascadeType.ALL)
     @Builder.Default
     @EqualsAndHashCode.Exclude
     private List<Transaction> transactions = new ArrayList<>();
