@@ -23,6 +23,10 @@ public class BankAccount {
     @EqualsAndHashCode.Exclude
     private List<Transaction> transactions;
 
+    public void addTransaction(Transaction transaction) {
+        transactions.add(transaction);
+    }
+
     @Override
     public String toString() {
         return "BankAccount(id=" + this.id + ", balance=" + this.balance + ", transactions=" + this.transactions + ")";
