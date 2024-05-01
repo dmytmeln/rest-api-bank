@@ -20,8 +20,7 @@ public class Transaction {
 
     private String type;
 
-    @Builder.Default
-    private Double moneyAmount = 0D;
+    private Double moneyAmount;
 
     @Builder.Default
     private LocalDateTime transactionDate = LocalDateTime.now();
