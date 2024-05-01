@@ -1,3 +1,8 @@
+DROP TABLE IF EXISTS user_bank_account;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS transactions;
+DROP TABLE IF EXISTS bank_accounts;
+
 CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
     firstname VARCHAR(50) NOT NULL,
@@ -15,12 +20,12 @@ CREATE TABLE IF NOT EXISTS bank_accounts (
 
 CREATE TABLE IF NOT EXISTS user_bank_account (
     users BIGINT NOT NULL,
-    bank_accounts BIGINT NOT NULL,
+    bank_account BIGINT NOT NULL,
 
     FOREIGN KEY (users) REFERENCES users(id),
-    FOREIGN KEY (bank_accounts) REFERENCES bank_accounts(id),
+    FOREIGN KEY (bank_account) REFERENCES bank_accounts(id),
 
-    PRIMARY KEY (users, bank_accounts)
+    PRIMARY KEY (users, bank_account)
 );
 
 CREATE TABLE IF NOT EXISTS transactions (
