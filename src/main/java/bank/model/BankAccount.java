@@ -16,10 +16,8 @@ public class BankAccount {
     @Id
     private Long id;
 
-    @Builder.Default
-    private Double balance = 0D;
+    private Double balance;
 
-    @EqualsAndHashCode.Exclude
     private List<Transaction> transactions;
 
     public void addTransaction(Transaction transaction) {
