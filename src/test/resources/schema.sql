@@ -1,3 +1,8 @@
+DROP TABLE IF EXISTS user_bank_account;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS transactions;
+DROP TABLE IF EXISTS bank_accounts;
+
 CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
     firstname VARCHAR(50) NOT NULL,
@@ -34,3 +39,5 @@ CREATE TABLE IF NOT EXISTS transactions (
 
     FOREIGN KEY (bank_accounts) REFERENCES bank_accounts(id)
 );
+
+ALTER TABLE user_bank_account DROP CONSTRAINT user_bank_account_bank_account_fkey;
