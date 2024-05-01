@@ -21,11 +21,7 @@ public class BankAccount {
     private Double balance = 0D;
 
     @EqualsAndHashCode.Exclude
-    private User user;
-
-    @Builder.Default
-    @EqualsAndHashCode.Exclude
-    private List<Transaction> transactions = new ArrayList<>();
+    private List<Transaction> transactions;
 
     @Override
     public String toString() {

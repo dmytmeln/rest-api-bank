@@ -7,8 +7,8 @@ VALUES (1000);
 INSERT INTO user_bank_account(users, bank_account)
 VALUES (1, 1);
 
-INSERT INTO transactions(bank_account_id, msg, type, money_amount, transaction_date)
-VALUES (1, 'msg', 'transaction_type', 1000, '2023-01-25 23:10:10');
+INSERT INTO transactions(bank_accounts, msg, type, money_amount, transaction_date, bank_accounts_key)
+VALUES (1, 'msg', 'transaction_type', 1000, '2023-01-25 23:10:10', 0);
 
-INSERT INTO transactions(bank_account_id, msg, type, money_amount, transaction_date)
-VALUES (1, 'msg', 'transaction_type', 2000, '2023-02-25 20:10:10');
+INSERT INTO transactions(bank_accounts, msg, type, money_amount, transaction_date, bank_accounts_key)
+VALUES (1, 'msg', 'transaction_type', 2000, '2023-02-25 20:10:10', 1);

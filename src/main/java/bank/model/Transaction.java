@@ -16,10 +16,6 @@ public class Transaction {
     @Id
     private Long id;
 
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private BankAccount bankAccount;
-
     private String msg;
 
     private String type;
