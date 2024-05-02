@@ -1,4 +1,4 @@
-package bank.dto;
+package bank.dto.transaction;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -8,10 +8,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder(toBuilder = true)
-@NoArgsConstructor
 @AllArgsConstructor
-public class TransactionForm {
+@NoArgsConstructor
+@Builder
+public class TransactionRequestDto {
 
     @NotNull(message = "Transaction msg can't be null")
     private String msg;
