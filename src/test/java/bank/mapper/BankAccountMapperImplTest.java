@@ -1,6 +1,7 @@
 package bank.mapper;
 
 import bank.dto.bank.BankResponseDto;
+import bank.mapper.impl.BankAccountMapperImpl;
 import bank.model.BankAccount;
 import bank.model.Transaction;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,8 +13,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class BankAccountMapperTest {
-    private final BankAccountMapper bankAccountMapper = new BankAccountMapper(new ModelMapper());
+public class BankAccountMapperImplTest {
+    private final BankAccountMapperImpl bankAccountMapperImpl = new BankAccountMapperImpl(new ModelMapper());
 
     private static BankAccount bankAccount;
 
@@ -29,7 +30,7 @@ public class BankAccountMapperTest {
 
     @Test
     public void testMapBankAccountToResponseDto() {
-        BankResponseDto bankResponseDto = bankAccountMapper.mapToBankResponseDto(bankAccount);
+        BankResponseDto bankResponseDto = bankAccountMapperImpl.mapToBankResponseDto(bankAccount);
 
         assertNotNull(bankResponseDto);
         assertEquals(bankResponseDto.getId(), bankAccount.getId());
