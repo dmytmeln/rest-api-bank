@@ -1,13 +1,16 @@
 package bank.dto.transaction;
 
-public record TransactionResponseDto(
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    Long id,
-    String msg,
-    String type,
-    Double moneyAmount,
-    String createdAt
-
-
-) {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class TransactionResponseDto {
+    private Long id;
+    private String msg;
+    private String type;
+    private Double moneyAmount;
+    private String transactionDate;
 }
