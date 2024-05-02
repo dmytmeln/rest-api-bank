@@ -21,6 +21,8 @@ public class BankRepositoryTest {
 
     private final BankRepository bankRepository;
 
+    private final Long bankAccountId = 1L;
+
     @Autowired
     public BankRepositoryTest(BankRepository bankRepository) {
         this.bankRepository = bankRepository;
@@ -36,10 +38,10 @@ public class BankRepositoryTest {
 
     @Test
     public void testFindBankAccountById() {
-        long expectedId = 1;
-        BankAccount bankAccount = bankRepository.findById(expectedId).get();
+        BankAccount bankAccount = bankRepository.findById(bankAccountId).orElse(null);
 
-        assertEquals(expectedId, bankAccount.getId());
+        assertNotNull(bankAccount);
+        assertEquals(bankAccountId, bankAccount.getId());
     }
 
     @Test
@@ -57,39 +59,47 @@ public class BankRepositoryTest {
 
     @Test
     public void testUpdateBankAccount() {
-        long expectedId = 1;
         double expectedBalance = 2000D;
-        List<Transaction> transactions = bankRepository.findById(expectedId).get().getTransactions();
         BankAccount bankAccount = BankAccount.builder()
-                .id(expectedId)
+                .id(bankAccountId)
                 .balance(expectedBalance)
-                .transactions(transactions)
                 .build();
-        bankRepository.save(bankAccount);
-        BankAccount updated = bankRepository.findById(expectedId).get();
+        bankRepository.updateWithoutTransactions(bankAccount.getBalance(), bankAccount.getId());
+        BankAccount updated = bankRepository.findById(bankAccountId).orElse(null);
 
-        assertEquals(expectedId, updated.getId());
-        assertEquals(expectedBalance, updated.getBalance());
+
+        assertNotNull(updated);
         assertNotNull(updated.getTransactions());
-        assertFalse(updated.getTransactions().isEmpty());
+        assertEquals(bankAccountId, updated.getId());
+        assertEquals(expectedBalance, updated.getBalance());
     }
 
     @Test
     public void testDeleteBankAccount() {
-        long realId = 1;
-        bankRepository.deleteById(realId);
-        BankAccount bankAccount = bankRepository.findById(realId).orElse(null);
+        bankRepository.deleteById(bankAccountId);
+        BankAccount bankAccount = bankRepository.findById(bankAccountId).orElse(null);
+        List<Transaction> transactionsByBankAccountId = bankRepository.findTransactionsByBankAccountId(bankAccountId);
 
         assertNull(bankAccount);
+        assertTrue(transactionsByBankAccountId.isEmpty());
     }
 
     @Test
     public void testFindTransactionsByBankAccountId() {
         int expectedSize = 2;
-        long bankAccountId = 1L;
         List<Transaction> transactionsByBankAccountId = bankRepository.findTransactionsByBankAccountId(bankAccountId);
 
         assertEquals(expectedSize, transactionsByBankAccountId.size());
+    }
+
+    @Test
+    public void testDeleteTransactionsByBankAccountId() {
+        bankRepository.deleteTransactionsByBankAccountId(bankAccountId);
+        List<Transaction> transactionsByBankAccountId = bankRepository.findTransactionsByBankAccountId(bankAccountId);
+        BankAccount bankAccount = bankRepository.findById(bankAccountId).orElse(null);
+
+        assertTrue(transactionsByBankAccountId.isEmpty());
+        assertNotNull(bankAccount);
     }
 
 }
