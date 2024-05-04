@@ -29,6 +29,10 @@ public interface UserRepository
     )
     boolean updateWithoutBankAccount(User user);
 
+    @Modifying
+    @Query("DELETE FROM bank_accounts ba WHERE ba.id = :bankAccountId")
+    boolean deleteBankAccountWithoutUser(@Param("bankAccountId") Long bankAccountId);
+
     @Query("SELECT ba.* FROM bank_accounts ba WHERE ba.users = :userId")
     List<BankAccount> findBankAccountsByUserId(@Param("userId") Long userId);
 

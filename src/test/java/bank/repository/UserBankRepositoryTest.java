@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -63,6 +64,16 @@ public class UserBankRepositoryTest {
 
         assertTrue(hasDeleted);
         assertTrue(transactionsByBankAccountId.isEmpty());
+    }
+
+    @Test
+    public void testDeleteBankAccountWithoutUser() {
+        long userId = 1L;
+        userRepository.deleteBankAccountWithoutUser(realBankAccountId);
+        boolean bankAccountAbsent = userRepository.findBankAccountsByUserId(userId).stream()
+                .noneMatch(bankAccount -> Objects.equals(bankAccount.getId(), realBankAccountId));
+
+        assertTrue(bankAccountAbsent);
     }
 
 }
