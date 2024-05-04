@@ -46,7 +46,8 @@ public class UserBankRepositoryTest {
                 .build();
 
         boolean hasUpdated = userRepository.updateBankAccountWithoutTransactions(bankAccount);
-        BankAccount bankAccountDb = userRepository.findBankAccountByBankAndUserIds(realBankAccountId, realUserId);
+        BankAccount bankAccountDb = userRepository.findBankAccountByBankAndUserIds(realBankAccountId, realUserId)
+                .orElseThrow(RuntimeException::new);
 
         assertTrue(hasUpdated);
         assertEquals(balance, bankAccountDb.getBalance());
