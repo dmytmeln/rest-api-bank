@@ -32,3 +32,5 @@ CREATE TABLE IF NOT EXISTS transactions (
 
     FOREIGN KEY (bank_accounts) REFERENCES bank_accounts(id)
 );
+
+ALTER TABLE transactions DROP CONSTRAINT transactions_bank_accounts_fkey;
