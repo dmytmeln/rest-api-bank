@@ -3,7 +3,7 @@ package bank.mapper.impl;
 import bank.dto.user.UserRequestDto;
 import bank.dto.user.UserResponseDto;
 import bank.mapper.UserMapper;
-import bank.model.BankAccountRef;
+import bank.model.BankAccount;
 import bank.model.Role;
 import bank.model.User;
 import org.modelmapper.Converter;
@@ -12,6 +12,7 @@ import org.modelmapper.TypeMap;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,9 +31,9 @@ public class UserMapperImpl implements UserMapper {
                         mapper -> mapper.using(passwordConverter).map(UserRequestDto::getPassword, User::setPassword)
                 );
 
-        Converter<Set<BankAccountRef>, Set<Long>> listConverter =
+        Converter<List<BankAccount>, Set<Long>> listConverter =
                 converter -> converter.getSource().stream()
-                        .map(bankAccountRef -> bankAccountRef.getBankAccount().getId())
+                        .map(BankAccount::getId)
                         .collect(Collectors.toSet());
         this.userToResponseMapper = modelMapper.createTypeMap(User.class, UserResponseDto.class)
                 .addMappings(mapper -> mapper.map(User::getRole, UserResponseDto::setRoleString))

@@ -1,6 +1,8 @@
 package bank.repository;
 
+import bank.model.BankAccount;
 import bank.model.Role;
+import bank.model.Transaction;
 import bank.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,35 +29,26 @@ public class UserRepositoryTest {
     }
 
     @Test
-    void readAllUsersTest() {
-        List<User> allUsers = userRepository.findAll();
+    void testFindAllUsers() {
         int expectedSize = 1;
+        List<User> allUsers = userRepository.findAll();
 
         assertEquals(expectedSize, allUsers.size(),
-                String.format("At least %d users should be in the USERS table", expectedSize));
+                "%d users should be in the users table".formatted(expectedSize));
     }
 
     @Test
-    void readExistingUserByIdTest() {
+    void testFindExistingUserById() {
         String expectedName = "Dmytro";
         long id = 1L;
-        User user = userRepository.findById(id).get();
+        User user = userRepository.findById(id).orElseThrow(RuntimeException::new);
 
         assertEquals(id, user.getId());
         assertEquals(expectedName, user.getFirstname());
     }
 
     @Test
-    void readByBankAccountId() {
-        long expectedId = 1L;
-        User expectedUser = userRepository.findById(expectedId).get();
-        User actualUser = userRepository.findByBankAccountId(expectedId).get();
-
-        assertEquals(expectedUser, actualUser);
-    }
-
-    @Test
-    void readNonExistingUserByIdTest() {
+    void testFindNonExistingUserById() {
         long id = 0L;
         User user = userRepository.findById(id).orElse(null);
 
@@ -63,7 +56,22 @@ public class UserRepositoryTest {
     }
 
     @Test
-    void createUserTest() {
+    public void testFindBankAccountsByUserId() {
+        int expectedSize = 1;
+        Long expectedBankAccountId = 1L;
+        Double expectedBalance = 1000D;
+
+        Long userId = 1L;
+        List<BankAccount> bankAccounts = userRepository.findBankAccountsByUserId(userId);
+        BankAccount bankAccount = bankAccounts.get(0);
+
+        assertEquals(expectedSize, bankAccounts.size());
+        assertEquals(expectedBankAccountId, bankAccount.getId());
+        assertEquals(expectedBalance, bankAccount.getBalance());
+    }
+
+    @Test
+    void testCreateUser() {
         int expectedSize = 2;
         long expectedId = 2;
         String email = "dimon281@gmail.com";
@@ -99,8 +107,8 @@ public class UserRepositoryTest {
                 .phoneNumber("380981258958")
                 .build();
 
-        userRepository.save(user);
-        User updatedUser = userRepository.findById(expectedId).get();
+        userRepository.updateWithoutBankAccount(user);
+        User updatedUser = userRepository.findById(expectedId).orElseThrow(RuntimeException::new);
 
         assertEquals(expectedSize, userRepository.findAll().size());
         assertEquals(expectedId, updatedUser.getId());
@@ -126,10 +134,11 @@ public class UserRepositoryTest {
         String expectedFirstName = "Dmytro";
 
         User user = userRepository.findUserByEmailAndPhoneNumberAndPassword(
-                existingEmail,
-                existingPhoneNumber,
-                existingPass
-        ).get();
+                        existingEmail,
+                        existingPhoneNumber,
+                        existingPass
+                )
+                .orElseThrow(RuntimeException::new);
 
         assertEquals(expectedId, user.getId());
         assertEquals(expectedFirstName, user.getFirstname());
@@ -142,10 +151,11 @@ public class UserRepositoryTest {
         String nonExistingPass = "1234";
 
         User user = userRepository.findUserByEmailAndPhoneNumberAndPassword(
-                existingEmail,
-                existingPhoneNumber,
-                nonExistingPass
-        ).orElse(null);
+                        existingEmail,
+                        existingPhoneNumber,
+                        nonExistingPass
+                )
+                .orElseThrow(RuntimeException::new);
 
         assertNull(user);
     }

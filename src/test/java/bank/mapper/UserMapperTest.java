@@ -3,7 +3,7 @@ package bank.mapper;
 import bank.dto.user.UserRequestDto;
 import bank.dto.user.UserResponseDto;
 import bank.mapper.impl.UserMapperImpl;
-import bank.model.BankAccountRef;
+import bank.model.BankAccount;
 import bank.model.Role;
 import bank.model.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.util.Set;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -60,15 +60,16 @@ public class UserMapperTest {
 
     @Test
     void testMapUserToResponse() {
+        long id = 1L;
         User user = User.builder()
-                .id(1L)
+                .id(id)
                 .firstname("John")
                 .lastname("Doe")
                 .password("12!@asAS")
                 .email("john.doe@example.com")
                 .phoneNumber("123123123123")
                 .role(Role.ROLE_USER)
-                .bankAccounts(Set.of(new BankAccountRef(() -> 1L)))
+                .bankAccounts(List.of(BankAccount.builder().id(id).build()))
                 .build();
         UserResponseDto mapped = userMapper.mapToResponseDto(user);
 
@@ -77,7 +78,7 @@ public class UserMapperTest {
         assertEquals(user.getLastname(), mapped.getLastname());
         assertEquals(user.getPassword(), mapped.getPassword());
         assertEquals(user.getPhoneNumber(), mapped.getPhoneNumber());
-        assertEquals(1L, mapped.getBankAccountsId().iterator().next());
+        assertEquals(id, mapped.getBankAccountsId().iterator().next());
     }
 
 

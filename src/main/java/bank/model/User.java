@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -36,7 +36,7 @@ public class User implements UserDetails {
 
     private Role role;
 
-    private Set<BankAccountRef> bankAccounts;
+    private List<BankAccount> bankAccounts;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
