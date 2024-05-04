@@ -1,16 +1,17 @@
 package bank.service;
 
+import bank.dto.bank.BankResponseDto;
+import bank.dto.transaction.TransactionRequestDto;
 import bank.model.BankAccount;
-import bank.dto.TransactionForm;
 
 public interface BankService {
 
-    BankAccount findById(Long accountId);
+    BankAccount findById(Long accountId, Long userId);
 
-    BankAccount makeDeposit(Long accountId, TransactionForm transaction);
+    BankResponseDto findBankResponseById(Long accountId, Long userId);
 
-    BankAccount makeWithdrawal(Long accountId, TransactionForm transaction);
+    BankResponseDto makeDeposit(Long accountId, Long userId, TransactionRequestDto transactionRequestDto);
 
-    BankAccount findBankAccountByUserId(Long userId);
+    BankResponseDto makeWithdrawal(Long accountId, Long userId, TransactionRequestDto transactionRequestDto);
 
 }
