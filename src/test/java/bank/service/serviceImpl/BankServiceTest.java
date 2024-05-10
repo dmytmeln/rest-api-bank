@@ -10,6 +10,7 @@ import bank.model.Role;
 import bank.model.Transaction;
 import bank.model.User;
 import bank.repository.UserRepository;
+import bank.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +35,8 @@ public class BankServiceTest {
     private TransactionMapper transactionMapperMock;
     @Mock
     private BankAccountMapper bankAccountMapperMock;
+    @Mock
+    private UserServiceImpl userService;
 
     @InjectMocks
     private BankServiceImpl bankService;
@@ -89,6 +92,16 @@ public class BankServiceTest {
     }
 
     @Test
+    void testDeleteBankAccount() {
+        when(userRepoMock.findBankAccountByBankAndUserIds(id, id)).thenReturn(Optional.of(bankAccount));
+        when(userRepoMock.deleteBankAccountWithoutUser(id)).thenReturn(true);
+
+        boolean hasDeleted = bankService.deleteBankAccount(id, id);
+
+        assertTrue(hasDeleted);
+    }
+
+    @Test
     void testMakeDepositTest() {
         double moneyAmount = 2000D;
         double expectedBalance = moneyAmount + bankAccount.getBalance();
@@ -115,8 +128,7 @@ public class BankServiceTest {
                 .transactionDate(LocalDateTime.now())
                 .build();
         BankResponseDto bankResponseDto = new BankResponseDto(id, bankAccount.getBalance(), List.of(id));
-        when(userRepoMock.findById(id)).thenReturn(Optional.of(user));
-        when(userRepoMock.findBankAccountByBankAndUserIds(id, id)).thenReturn(Optional.of(bankAccount));
+        when(userService.findById(id)).thenReturn(user);
         when(userRepoMock.save(user)).thenReturn(user);
         when(transactionMapperMock.mapToEntity(transactionRequestDto)).thenReturn(transaction);
         when(bankAccountMapperMock.mapToBankResponseDto(bankAccount)).thenReturn(bankResponseDto);
@@ -162,8 +174,7 @@ public class BankServiceTest {
                 .transactionDate(LocalDateTime.now())
                 .build();
         BankResponseDto bankResponseDto = new BankResponseDto(id, bankAccount.getBalance(), List.of(id));
-        when(userRepoMock.findById(id)).thenReturn(Optional.of(user));
-        when(userRepoMock.findBankAccountByBankAndUserIds(id, id)).thenReturn(Optional.of(bankAccount));
+        when(userService.findById(id)).thenReturn(user);
         when(userRepoMock.save(user)).thenReturn(user);
         when(transactionMapperMock.mapToEntity(transactionRequestDto)).thenReturn(transaction);
         when(bankAccountMapperMock.mapToBankResponseDto(bankAccount)).thenReturn(bankResponseDto);
