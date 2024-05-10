@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +37,14 @@ public class User implements UserDetails {
 
     private Role role;
 
-    private List<BankAccount> bankAccounts;
+    private List<BankAccount> bankAccounts = new ArrayList<>();
+
+    public void addBankAccount(BankAccount bankAccount) {
+        if (bankAccounts == null) {
+            bankAccounts = new ArrayList<>();
+        }
+        bankAccounts.add(bankAccount);
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
