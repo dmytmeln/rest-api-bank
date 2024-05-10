@@ -76,7 +76,6 @@ public class UserMapperTest {
         assertEquals(user.getEmail(), mapped.getEmail());
         assertEquals(user.getFirstname(), mapped.getFirstname());
         assertEquals(user.getLastname(), mapped.getLastname());
-        assertEquals(user.getPassword(), mapped.getPassword());
         assertEquals(user.getPhoneNumber(), mapped.getPhoneNumber());
         assertEquals(id, mapped.getBankAccountsId().iterator().next());
     }
