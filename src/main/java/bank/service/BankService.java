@@ -10,6 +10,8 @@ public interface BankService {
 
     BankResponseDto findBankResponseById(Long accountId, Long userId);
 
+    BankResponseDto creteBankAccountForUser(Long userId);
+
     boolean deleteBankAccount(Long accountId, Long userId);
 
     BankResponseDto makeDeposit(Long accountId, Long userId, TransactionRequestDto transactionRequestDto);

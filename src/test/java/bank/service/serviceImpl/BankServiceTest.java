@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -89,6 +90,44 @@ public class BankServiceTest {
     void testInvalidFindBankResponseById() {
         when(userRepoMock.findBankAccountByBankAndUserIds(id, id)).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class, () -> bankService.findById(id, id));
+    }
+
+    @Test
+    void testCreateBankAccount() {
+        int expectedSize = 2;
+        long userId = 1L;
+        long expectedBankAccountId = 2L;
+        User user = User.builder()
+                .firstname("John")
+                .lastname("Doe")
+                .password("12!@asAS")
+                .email("john.doe@example.com")
+                .phoneNumber("123123123123")
+                .role(Role.ROLE_USER)
+                .bankAccounts(new ArrayList<>(List.of(bankAccount)))
+                .build();
+        BankResponseDto bankResponseDto = new BankResponseDto(id, bankAccount.getBalance(), List.of(id));
+
+        when(userService.findById(userId)).thenReturn(user);
+        when(userRepoMock.save(user))
+                .thenAnswer(invocationOnMock -> {
+                    User userToUpdate = invocationOnMock.getArgument(0);
+                    List<BankAccount> bankAccounts = userToUpdate.getBankAccounts();
+                    BankAccount bankAccountToUpdate = bankAccounts.get(bankAccounts.size() - 1);
+                    bankAccountToUpdate.setId(expectedBankAccountId);
+                    bankAccountToUpdate.setTransactions(new ArrayList<>());
+                    return userToUpdate;
+                });
+        when(bankAccountMapperMock.mapToBankResponseDto(any(BankAccount.class))).thenReturn(bankResponseDto);
+
+        BankResponseDto actualBankResponseDto = bankService.creteBankAccountForUser(userId);
+
+        List<BankAccount> bankAccounts = user.getBankAccounts();
+        int size = bankAccounts.size();
+        assertEquals(expectedSize, size);
+        assertEquals(expectedBankAccountId, bankAccounts.get(size - 1).getId());
+        assertEquals(bankResponseDto.getId(), actualBankResponseDto.getId());
+
     }
 
     @Test
@@ -202,8 +241,17 @@ public class BankServiceTest {
                 .msg(expectedInfo)
                 .type(expectedInfo)
                 .build();
-        when(userRepoMock.findById(id)).thenReturn(Optional.of(new User()));
-        when(userRepoMock.findBankAccountByBankAndUserIds(id, id)).thenReturn(Optional.of(bankAccount));
+        User user = User.builder()
+                .firstname("Peter")
+                .lastname("Stinger")
+                .email("dimon281@gmail.com")
+                .password("asAS!@12")
+                .phoneNumber("380981258958")
+                .bankAccounts(new ArrayList<>(List.of(bankAccount)))
+                .role(Role.ROLE_USER)
+                .build();
+
+        when(userService.findById(id)).thenReturn(user);
 
         assertThrows(IllegalArgumentException.class, () -> bankService.makeWithdrawal(id, id, transactionRequestDto));
     }

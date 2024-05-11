@@ -28,17 +28,32 @@ public class BankServiceImpl implements BankService {
 
     @Override
     public BankAccount findById(Long accountId, Long userId) {
-        return userRepository.findBankAccountByBankAndUserIds(accountId, userId).orElseThrow(
-                () -> new EntityNotFoundException(
-                        "Account with id [%d] and/or user id [%d] not found!".formatted(accountId, userId)
-                )
-        );
+        return userRepository.findBankAccountByBankAndUserIds(accountId, userId)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "Account with id [%d] and/or user id [%d] not found!".formatted(accountId, userId)
+                        )
+                );
     }
 
     @Override
     public BankResponseDto findBankResponseById(Long accountId, Long userId) {
         BankAccount bankAccount = findById(accountId, userId);
         return bankAccountMapper.mapToBankResponseDto(bankAccount);
+    }
+
+    @Override
+    public BankResponseDto creteBankAccountForUser(Long userId) {
+        User user = userService.findById(userId);
+        user.addBankAccount(
+                BankAccount.builder()
+                        .balance(0D)
+                        .build()
+        );
+        User saved = userRepository.save(user);
+        List<BankAccount> bankAccounts = saved.getBankAccounts();
+
+        return bankAccountMapper.mapToBankResponseDto(bankAccounts.get(bankAccounts.size() - 1));
     }
 
     @Override
