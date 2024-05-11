@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -52,6 +54,27 @@ public class TransactionMapperImplTest {
         assertEquals(transactionResponseDto.getType(), transaction.getType());
         assertEquals(transactionResponseDto.getMoneyAmount(), transaction.getMoneyAmount());
         assertEquals(transactionResponseDto.getTransactionDate(), transaction.getTransactionDate().toString());
+    }
+
+    @Test
+    public void testMapEntityListToResponseDtoList() {
+        int expectedSize = 2;
+        long expectedTransactionId = 1;
+
+        Transaction transaction2 = Transaction.builder()
+                .id(2L)
+                .msg("Transaction Message")
+                .type("Transaction Type")
+                .moneyAmount(200D)
+                .transactionDate(LocalDateTime.now())
+                .build();
+        List<Transaction> transactions = new ArrayList<>(List.of(transaction, transaction2));
+
+        List<TransactionResponseDto> transactionResponseDtos = transactionMapper.mapEntityListToResponseDtoList(transactions);
+
+        assertEquals(expectedSize, transactionResponseDtos.size());
+        TransactionResponseDto actualDto = transactionResponseDtos.get(0);
+        assertEquals(expectedTransactionId, actualDto.getId());
     }
 
 }

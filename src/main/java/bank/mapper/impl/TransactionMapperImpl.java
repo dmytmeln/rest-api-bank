@@ -10,6 +10,8 @@ import org.modelmapper.TypeMap;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class TransactionMapperImpl implements TransactionMapper {
@@ -38,4 +40,10 @@ public class TransactionMapperImpl implements TransactionMapper {
         return typeMap.map(transaction);
     }
 
+    @Override
+    public List<TransactionResponseDto> mapEntityListToResponseDtoList(List<Transaction> transactions) {
+        return transactions.stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
 }
