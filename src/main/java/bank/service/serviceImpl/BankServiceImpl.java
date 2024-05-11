@@ -87,29 +87,13 @@ public class BankServiceImpl implements BankService {
     @Transactional
     public BankResponseDto makeDeposit(Long accountId, Long userId, TransactionRequestDto transactionRequestDto) {
 
-        User user = userService.findById(userId);
+        BankAccount bankAccount = findById(userId, accountId);
 
-        BankResponseDto bankResponseDto = null;
-        List<BankAccount> bankAccounts = user.getBankAccounts();
-        for (int index = 0; index < bankAccounts.size(); index++) {
+        bankAccount.setBalance(bankAccount.getBalance() + transactionRequestDto.getMoneyAmount());
+        bankAccount.addTransaction(transactionMapper.mapToEntity(transactionRequestDto));
+        BankAccount updatedUserBankAccount = updateUserBankAccount(userId, bankAccount);
 
-            BankAccount bankAccount = bankAccounts.get(index);
-
-            if (Objects.equals(bankAccount.getId(), accountId)) {
-                double newBalance = bankAccount.getBalance() + transactionRequestDto.getMoneyAmount();
-                bankAccount.setBalance(newBalance);
-                bankAccount.addTransaction(transactionMapper.mapToEntity(transactionRequestDto));
-                bankAccounts.set(index, bankAccount);
-                bankResponseDto = bankAccountMapper.mapToBankResponseDto(bankAccount);
-                break;
-            }
-        }
-        if (bankResponseDto == null) {
-            throw new EntityNotFoundException("Bank account with id [%d] not found!".formatted(accountId));
-        }
-        userRepository.save(user);
-
-        return bankResponseDto;
+        return bankAccountMapper.mapToBankResponseDto(updatedUserBankAccount);
 
     }
 
@@ -117,33 +101,21 @@ public class BankServiceImpl implements BankService {
     @Transactional
     public BankResponseDto makeWithdrawal(Long accountId, Long userId, TransactionRequestDto transactionRequestDto) {
 
-        User user = userService.findById(userId);
+        BankAccount bankAccount = findById(userId, accountId);
 
-        BankResponseDto bankResponseDto = null;
-        List<BankAccount> bankAccounts = user.getBankAccounts();
-        for (int index = 0; index < bankAccounts.size(); index++) {
-
-            BankAccount bankAccount = bankAccounts.get(index);
-
-            if (Objects.equals(bankAccount.getId(), accountId)) {
-                Double moneyAmount = transactionRequestDto.getMoneyAmount();
-                double newBalance = bankAccount.getBalance() - moneyAmount;
-                if (newBalance < 0) {
-                    throw  new IllegalArgumentException("You don't have enough money to withdraw [%f$]".formatted(moneyAmount));
-                }
-                bankAccount.setBalance(newBalance);
-                bankAccount.addTransaction(transactionMapper.mapToEntity(transactionRequestDto));
-                bankAccounts.set(index, bankAccount);
-                bankResponseDto = bankAccountMapper.mapToBankResponseDto(bankAccount);
-                break;
-            }
+        // Check if there's enough money in the User's Bank Account
+        double moneyAmount = transactionRequestDto.getMoneyAmount();
+        double newBalance = bankAccount.getBalance() - moneyAmount;
+        if (newBalance < 0) {
+            throw  new IllegalArgumentException("You don't have enough money to withdraw [%f$]".formatted(moneyAmount));
         }
-        if (bankResponseDto == null) {
-            throw new EntityNotFoundException("Bank account with id [%d] not found!".formatted(accountId));
-        }
-        userRepository.save(user);
 
-        return bankResponseDto;
+        // Update Bank Account
+        bankAccount.setBalance(newBalance);
+        bankAccount.addTransaction(transactionMapper.mapToEntity(transactionRequestDto));
+        BankAccount updatedUserBankAccount = updateUserBankAccount(userId, bankAccount);
+
+        return bankAccountMapper.mapToBankResponseDto(updatedUserBankAccount);
 
     }
 

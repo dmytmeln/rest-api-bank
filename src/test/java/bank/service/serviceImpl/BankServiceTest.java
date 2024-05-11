@@ -141,6 +141,7 @@ public class BankServiceTest {
 
     @Test
     void testMakeDepositTest() {
+
         double moneyAmount = 2000D;
         double expectedBalance = moneyAmount + bankAccount.getBalance();
         TransactionRequestDto transactionRequestDto = TransactionRequestDto.builder()
@@ -148,7 +149,8 @@ public class BankServiceTest {
                 .msg("Transaction Msg")
                 .moneyAmount(moneyAmount)
                 .build();
-        final int expectedUserBankAccountsListSize = 1;
+        int expectedUserBankAccountsListSize = 1;
+        long userId = 1L;
         User user = User.builder()
                 .firstname("Peter")
                 .lastname("Stinger")
@@ -166,11 +168,12 @@ public class BankServiceTest {
                 .transactionDate(LocalDateTime.now())
                 .build();
         BankResponseDto bankResponseDto = new BankResponseDto(id, bankAccount.getBalance(), List.of(id));
-        when(userService.findById(id)).thenReturn(user);
+        when(userService.findById(userId)).thenReturn(user);
         when(userRepoMock.save(user)).thenReturn(user);
         when(transactionMapperMock.mapToEntity(transactionRequestDto)).thenReturn(transaction);
         when(bankAccountMapperMock.mapToBankResponseDto(bankAccount)).thenReturn(bankResponseDto);
-        BankResponseDto result = bankService.makeDeposit(id, id, transactionRequestDto);
+        when(userRepoMock.findBankAccountByBankAndUserIds(userId, id)).thenReturn(Optional.of(bankAccount));
+        BankResponseDto result = bankService.makeDeposit(id, userId, transactionRequestDto);
 
         assertEquals(bankResponseDto, result);
         assertEquals(bankResponseDto, result);
@@ -182,6 +185,7 @@ public class BankServiceTest {
         BankAccount actual = bankAccounts.get(0);
         assertEquals(bankAccount, actual);
         assertEquals(expectedBalance, actual.getBalance());
+
     }
 
 
@@ -195,6 +199,7 @@ public class BankServiceTest {
                 .moneyAmount(moneyAmount)
                 .build();
         final int expectedUserBankAccountsListSize = 1;
+        long userId = 1L;
         User user = User.builder()
                 .firstname("Peter")
                 .lastname("Stinger")
@@ -214,10 +219,11 @@ public class BankServiceTest {
         BankResponseDto bankResponseDto = new BankResponseDto(id, bankAccount.getBalance(), List.of(id));
         when(userService.findById(id)).thenReturn(user);
         when(userRepoMock.save(user)).thenReturn(user);
+        when(userRepoMock.findBankAccountByBankAndUserIds(userId, id)).thenReturn(Optional.of(bankAccount));
         when(transactionMapperMock.mapToEntity(transactionRequestDto)).thenReturn(transaction);
         when(bankAccountMapperMock.mapToBankResponseDto(bankAccount)).thenReturn(bankResponseDto);
 
-        BankResponseDto result = bankService.makeWithdrawal(id, id, transactionRequestDto);
+        BankResponseDto result = bankService.makeWithdrawal(id, userId, transactionRequestDto);
 
         assertEquals(bankResponseDto, result);
         assertEquals(bankResponseDto, result);
@@ -234,12 +240,13 @@ public class BankServiceTest {
     @Test
     void testInvalidMakeWithdrawalTest() {
         String expectedInfo = "Transaction Test Withdrawal";
-        double moneyAmount = 2000.;
+        double moneyAmount = 20000.;
         TransactionRequestDto transactionRequestDto = TransactionRequestDto.builder()
                 .moneyAmount(moneyAmount)
                 .msg(expectedInfo)
                 .type(expectedInfo)
                 .build();
+        long userId = 1L;
         User user = User.builder()
                 .firstname("Peter")
                 .lastname("Stinger")
@@ -250,7 +257,7 @@ public class BankServiceTest {
                 .role(Role.ROLE_USER)
                 .build();
 
-        when(userService.findById(id)).thenReturn(user);
+        when(userRepoMock.findBankAccountByBankAndUserIds(userId, id)).thenReturn(Optional.of(bankAccount));
 
         assertThrows(IllegalArgumentException.class, () -> bankService.makeWithdrawal(id, id, transactionRequestDto));
     }
