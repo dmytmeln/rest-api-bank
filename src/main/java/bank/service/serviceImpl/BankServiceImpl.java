@@ -6,6 +6,7 @@ import bank.exception.EntityNotFoundException;
 import bank.mapper.BankAccountMapper;
 import bank.mapper.TransactionMapper;
 import bank.model.BankAccount;
+import bank.model.Transaction;
 import bank.model.User;
 import bank.repository.UserRepository;
 import bank.service.BankService;
@@ -72,6 +73,7 @@ public class BankServiceImpl implements BankService {
             BankAccount oldBankAccount = bankAccounts.get(index);
 
             if (Objects.equals(oldBankAccount.getId(), accountId)) {
+                addTransactions(oldBankAccount, bankAccountToUpdate);
                 bankAccounts.set(index, bankAccountToUpdate);
                 userRepository.save(user);
                 return bankAccountToUpdate;
@@ -81,6 +83,21 @@ public class BankServiceImpl implements BankService {
         throw new EntityNotFoundException(
                 "Bank account with id [%d] not found!".formatted(accountId)
         );
+    }
+
+    private void addTransactions(BankAccount from, BankAccount to) {
+        boolean isInList;
+        for (Transaction newTransaction : to.getTransactions()) {
+            Long newTransactionId = newTransaction.getId();
+            // check if transaction is already in list
+            isInList = from.getTransactions().stream()
+                    .anyMatch(oldTransaction -> Objects.equals(newTransactionId, oldTransaction.getId()));
+            if (!isInList) {
+                from.addTransaction(newTransaction);
+            }
+        }
+        // add transactions this way to preserve order of transactions
+        to.setTransactions(from.getTransactions());
     }
 
     @Override
