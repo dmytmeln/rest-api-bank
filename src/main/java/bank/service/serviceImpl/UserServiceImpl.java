@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
         existsByEmailOrPhoneNumber(userRequestDto);
 
         User user = userMapper.mapToEntity(userRequestDto);
-        user.addBankAccount(BankAccount.builder().balance(0D).build());
+        user.addBankAccount(BankAccount.builder().balance(0D).build()); // automatically create bank account for user
 
         User savedUser = userRepo.save(user);
         return userMapper.mapToResponseDto(savedUser);
