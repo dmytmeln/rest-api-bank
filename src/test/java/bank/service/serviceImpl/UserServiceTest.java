@@ -272,7 +272,6 @@ public class UserServiceTest {
         );
     }
 
-    // TODO test method update and implement it
     @Test
     void testUpdate_updateEmailAndPhoneNumber() {
 

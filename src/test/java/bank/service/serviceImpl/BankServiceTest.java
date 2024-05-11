@@ -10,7 +10,6 @@ import bank.model.Role;
 import bank.model.Transaction;
 import bank.model.User;
 import bank.repository.UserRepository;
-import bank.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
