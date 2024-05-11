@@ -59,6 +59,8 @@ public class BankServiceTest {
 
         BankAccount result = bankService.findById(id, id);
 
+        verify(userRepoMock, times(1)).findBankAccountByBankAndUserIds(id, id);
+
         assertNotNull(result);
         assertEquals(bankAccount, result);
     }
@@ -66,7 +68,10 @@ public class BankServiceTest {
     @Test
     void testInvalidFindById() {
         when(userRepoMock.findBankAccountByBankAndUserIds(id, id)).thenReturn(Optional.empty());
+
         assertThrows(EntityNotFoundException.class, () -> bankService.findById(id, id));
+
+        verify(userRepoMock, times(1)).findBankAccountByBankAndUserIds(id, id);
     }
 
     @Test
@@ -76,10 +81,14 @@ public class BankServiceTest {
                 bankAccount.getBalance(),
                 new ArrayList<>()
         );
+
         when(userRepoMock.findBankAccountByBankAndUserIds(id, id)).thenReturn(Optional.of(bankAccount));
         when(bankAccountMapperMock.mapToBankResponseDto(bankAccount)).thenReturn(bankResponseDto);
 
         BankResponseDto result = bankService.findBankResponseById(id, id);
+
+        verify(userRepoMock, times(1)).findBankAccountByBankAndUserIds(id, id);
+        verify(bankAccountMapperMock, times(1)).mapToBankResponseDto(bankAccount);
 
         assertNotNull(result);
         assertEquals(bankResponseDto, result);
@@ -88,7 +97,10 @@ public class BankServiceTest {
     @Test
     void testInvalidFindBankResponseById() {
         when(userRepoMock.findBankAccountByBankAndUserIds(id, id)).thenReturn(Optional.empty());
+
         assertThrows(EntityNotFoundException.class, () -> bankService.findById(id, id));
+
+        verify(userRepoMock, times(1)).findBankAccountByBankAndUserIds(id, id);
     }
 
     @Test
@@ -121,6 +133,10 @@ public class BankServiceTest {
 
         BankResponseDto actualBankResponseDto = bankService.creteBankAccountForUser(userId);
 
+        verify(userService, times(1)).findById(userId);
+        verify(userRepoMock, times(1)).save(user);
+        verify(bankAccountMapperMock, times(1)).mapToBankResponseDto(any(BankAccount.class));
+
         List<BankAccount> bankAccounts = user.getBankAccounts();
         int size = bankAccounts.size();
         assertEquals(expectedSize, size);
@@ -135,6 +151,9 @@ public class BankServiceTest {
         when(userRepoMock.deleteBankAccountWithoutUser(id)).thenReturn(true);
 
         boolean hasDeleted = bankService.deleteBankAccount(id, id);
+
+        verify(userRepoMock, times(1)).findBankAccountByBankAndUserIds(id, id);
+        verify(userRepoMock, times(1)).deleteBankAccountWithoutUser(id);
 
         assertTrue(hasDeleted);
     }
@@ -169,11 +188,18 @@ public class BankServiceTest {
                 .build();
         BankResponseDto bankResponseDto = new BankResponseDto(id, bankAccount.getBalance(), List.of(id));
         when(userService.findById(userId)).thenReturn(user);
-        when(userRepoMock.save(user)).thenReturn(user);
+        when(userRepoMock.findBankAccountByBankAndUserIds(userId, id)).thenReturn(Optional.of(bankAccount));
+        when(userRepoMock.save(any(User.class))).thenReturn(user);
         when(transactionMapperMock.mapToEntity(transactionRequestDto)).thenReturn(transaction);
         when(bankAccountMapperMock.mapToBankResponseDto(bankAccount)).thenReturn(bankResponseDto);
-        when(userRepoMock.findBankAccountByBankAndUserIds(userId, id)).thenReturn(Optional.of(bankAccount));
+
         BankResponseDto result = bankService.makeDeposit(id, userId, transactionRequestDto);
+
+        verify(userService, times(1)).findById(id);
+        verify(userRepoMock, times(1)).save(any(User.class));
+        verify(userRepoMock, times(1)).findBankAccountByBankAndUserIds(userId, id);
+        verify(transactionMapperMock, times(1)).mapToEntity(transactionRequestDto);
+        verify(bankAccountMapperMock, times(1)).mapToBankResponseDto(bankAccount);
 
         assertEquals(bankResponseDto, result);
         assertEquals(bankResponseDto, result);
@@ -218,12 +244,18 @@ public class BankServiceTest {
                 .build();
         BankResponseDto bankResponseDto = new BankResponseDto(id, bankAccount.getBalance(), List.of(id));
         when(userService.findById(id)).thenReturn(user);
-        when(userRepoMock.save(user)).thenReturn(user);
+        when(userRepoMock.save(any(User.class))).thenReturn(user);
         when(userRepoMock.findBankAccountByBankAndUserIds(userId, id)).thenReturn(Optional.of(bankAccount));
         when(transactionMapperMock.mapToEntity(transactionRequestDto)).thenReturn(transaction);
         when(bankAccountMapperMock.mapToBankResponseDto(bankAccount)).thenReturn(bankResponseDto);
 
         BankResponseDto result = bankService.makeWithdrawal(id, userId, transactionRequestDto);
+
+        verify(userService, times(1)).findById(id);
+        verify(userRepoMock, times(1)).save(any(User.class));
+        verify(userRepoMock, times(1)).findBankAccountByBankAndUserIds(userId, id);
+        verify(transactionMapperMock, times(1)).mapToEntity(transactionRequestDto);
+        verify(bankAccountMapperMock, times(1)).mapToBankResponseDto(bankAccount);
 
         assertEquals(bankResponseDto, result);
         assertEquals(bankResponseDto, result);
@@ -260,6 +292,8 @@ public class BankServiceTest {
         when(userRepoMock.findBankAccountByBankAndUserIds(userId, id)).thenReturn(Optional.of(bankAccount));
 
         assertThrows(IllegalArgumentException.class, () -> bankService.makeWithdrawal(id, id, transactionRequestDto));
+
+        verify(userRepoMock, times(1)).findBankAccountByBankAndUserIds(userId, id);
     }
 
     @Test
