@@ -24,7 +24,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class BankServiceTest {
@@ -253,6 +253,73 @@ public class BankServiceTest {
         when(userService.findById(id)).thenReturn(user);
 
         assertThrows(IllegalArgumentException.class, () -> bankService.makeWithdrawal(id, id, transactionRequestDto));
+    }
+
+    @Test
+    void testUpdateUserBankAccount_existingBankAccount() {
+
+        long userId = 1L;
+        User user = User.builder()
+                .firstname("Peter")
+                .lastname("Stinger")
+                .email("dimon281@gmail.com")
+                .password("asAS!@12")
+                .phoneNumber("380981258958")
+                .bankAccounts(new ArrayList<>(List.of(bankAccount)))
+                .role(Role.ROLE_USER)
+                .build();
+        double newBalance = 2000D;
+        BankAccount bankAccountToUpdate = BankAccount.builder()
+                .id(id)
+                .balance(newBalance)
+                .transactions(new ArrayList<>())
+                .build();
+
+        when(userService.findById(userId)).thenReturn(user);
+        when(userRepoMock.save(any(User.class)))
+                .thenAnswer(invocationOnMock
+                        -> invocationOnMock.getArgument(0));
+
+        BankAccount updated = bankService.updateUserBankAccount(userId, bankAccountToUpdate);
+
+        verify(userService, times(1)).findById(userId);
+        verify(userRepoMock, times(1)).save(any(User.class));
+
+        assertEquals(newBalance, updated.getBalance());
+        assertEquals(id, updated.getId());
+
+    }
+
+    @Test
+    void testUpdateUserBankAccount_nonExistingBankAccount() {
+
+        long userId = 1L;
+        User user = User.builder()
+                .firstname("Peter")
+                .lastname("Stinger")
+                .email("dimon281@gmail.com")
+                .password("asAS!@12")
+                .phoneNumber("380981258958")
+                .bankAccounts(new ArrayList<>(List.of(bankAccount)))
+                .role(Role.ROLE_USER)
+                .build();
+        double newBalance = 2000D;
+        long nonExistingBankAccountId = -1L;
+        BankAccount bankAccountToUpdate = BankAccount.builder()
+                .id(nonExistingBankAccountId)
+                .balance(newBalance)
+                .transactions(new ArrayList<>())
+                .build();
+
+        when(userService.findById(userId)).thenReturn(user);
+
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> bankService.updateUserBankAccount(userId, bankAccountToUpdate)
+        );
+
+        verify(userService, times(1)).findById(userId);
+
     }
 
 

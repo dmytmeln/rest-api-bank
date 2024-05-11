@@ -18,4 +18,6 @@ public interface BankService {
 
     BankResponseDto makeWithdrawal(Long accountId, Long userId, TransactionRequestDto transactionRequestDto);
 
+    BankAccount updateUserBankAccount(Long userId, BankAccount bankAccount);
+
 }

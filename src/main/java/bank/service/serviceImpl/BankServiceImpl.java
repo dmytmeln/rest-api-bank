@@ -63,6 +63,27 @@ public class BankServiceImpl implements BankService {
     }
 
     @Override
+    public BankAccount updateUserBankAccount(Long userId, BankAccount bankAccountToUpdate) {
+        User user = userService.findById(userId);
+
+        List<BankAccount> bankAccounts = user.getBankAccounts();
+        Long accountId = bankAccountToUpdate.getId();
+        for (int index = 0; index < bankAccounts.size(); index++) {
+            BankAccount oldBankAccount = bankAccounts.get(index);
+
+            if (Objects.equals(oldBankAccount.getId(), accountId)) {
+                bankAccounts.set(index, bankAccountToUpdate);
+                userRepository.save(user);
+                return bankAccountToUpdate;
+            }
+        }
+
+        throw new EntityNotFoundException(
+                "Bank account with id [%d] not found!".formatted(accountId)
+        );
+    }
+
+    @Override
     @Transactional
     public BankResponseDto makeDeposit(Long accountId, Long userId, TransactionRequestDto transactionRequestDto) {
 
