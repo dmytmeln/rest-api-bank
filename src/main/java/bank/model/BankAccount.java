@@ -19,6 +19,7 @@ public class BankAccount {
 
     private Double balance;
 
+    @Builder.Default
     private List<Transaction> transactions = new ArrayList<>();
 
     public void addTransaction(Transaction transaction) {

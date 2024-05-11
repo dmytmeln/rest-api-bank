@@ -37,6 +37,7 @@ public class User implements UserDetails {
 
     private Role role;
 
+    @Builder.Default
     private List<BankAccount> bankAccounts = new ArrayList<>();
 
     public void addBankAccount(BankAccount bankAccount) {
