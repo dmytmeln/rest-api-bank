@@ -1,13 +1,13 @@
 package bank.service;
 
-import bank.model.Transaction;
+import bank.dto.transaction.TransactionResponseDto;
 
 import java.util.List;
 
 public interface TransactionService {
 
-    List<Transaction> getBankAccountTransactions(Long bankAccountId);
+    List<TransactionResponseDto> getBankAccountTransactions(Long bankAccountId);
 
-    List<Transaction> getBankAccountTransactionsByUserId(Long userId);
+    void clearBankAccountTransactions(Long bankAccountId);
 
 }

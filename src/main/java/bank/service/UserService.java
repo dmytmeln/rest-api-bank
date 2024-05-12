@@ -1,7 +1,8 @@
 package bank.service;
 
+import bank.dto.user.UserResponseDto;
 import bank.model.User;
-import bank.dto.UserForm;
+import bank.dto.user.UserRequestDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {
@@ -10,13 +11,14 @@ public interface UserService extends UserDetailsService {
 
     User findById(Long userId);
 
-    User signup(UserForm user);
+    UserResponseDto findResponseById(Long userId);
 
-    User update(UserForm user, Long userId);
+    UserResponseDto signup(UserRequestDto user);
 
-    void alreadyExists(UserForm user, Long userId);
+    UserResponseDto update(UserRequestDto user, Long userId);
 
-    void checkIfUserExistsByEmailOrPhoneNumber(UserForm userForm);
+    boolean alreadyExists(UserRequestDto user, Long userId);
 
+    boolean existsByEmailOrPhoneNumber(UserRequestDto userRequestDto);
 
 }

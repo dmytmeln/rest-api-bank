@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -18,9 +19,13 @@ public class BankAccount {
 
     private Double balance;
 
-    private List<Transaction> transactions;
+    @Builder.Default
+    private List<Transaction> transactions = new ArrayList<>();
 
     public void addTransaction(Transaction transaction) {
+        if (transactions == null) {
+            transactions = new ArrayList<>();
+        }
         transactions.add(transaction);
     }
 

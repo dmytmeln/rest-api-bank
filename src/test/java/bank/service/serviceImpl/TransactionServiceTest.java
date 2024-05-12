@@ -1,77 +1,96 @@
-//package bank.service.serviceImpl;
-//
-//import bank.model.BankAccount;
-//import bank.model.Transaction;
-//import bank.service.BankService;
-//import org.junit.jupiter.api.BeforeAll;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//
-//import java.util.List;
-//
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertNotNull;
-//import static org.mockito.Mockito.when;
-//
-//@ExtendWith(MockitoExtension.class)
-//public class TransactionServiceTest {
-//
-//    @Mock
-//    private TransactionRepository transactionRepoMock;
-//    @Mock
-//    private BankService bankServiceMock;
-//
-//    @InjectMocks
-//    private TransactionServiceImpl transactionService;
-//
-//    private static List<Transaction> transactions;
-//    private static BankAccount bankAccount;
-//    private final static Long ID = 1L;
-//
-//    @BeforeAll
-//    static void init() {
-//        bankAccount = BankAccount.builder()
-//                .id(ID)
-//                .build();
-//
-//        Transaction transaction = Transaction.builder()
-//                .id(ID)
-//                .msg("Transaction Message")
-//                .type("Transaction Type")
-//                .moneyAmount(1000D)
-//                .bankAccount(bankAccount)
-//                .build();
-//
-//        transactions = List.of(transaction);
-//    }
-//
-//    @BeforeEach
-//    void setup() {
-//        when(bankServiceMock.findById(ID)).thenReturn(bankAccount);
-//        when(transactionRepoMock.findTransactionsByBankAccountId(ID)).thenReturn(transactions);
-//    }
-//
-//    @Test
-//    void testGetBankAccountTransactions() {
-//        List<Transaction> bankAccountTransactions = transactionService.getBankAccountTransactions(ID);
-//
-//        assertNotNull(bankAccountTransactions);
-//        assertEquals(bankAccountTransactions, transactions);
-//    }
-//
-//    @Test
-//    void testGetBankAccountTransactionsByUserId() {
-//        when(bankServiceMock.findBankAccountByUserId(ID)).thenReturn(bankAccount);
-//
-//        List<Transaction> bankAccountTransactions = transactionService.getBankAccountTransactionsByUserId(ID);
-//
-//        assertNotNull(bankAccountTransactions);
-//        assertEquals(bankAccountTransactions, transactions);
-//    }
-//
-//
-//}
+package bank.service.serviceImpl;
+
+import bank.dto.transaction.TransactionResponseDto;
+import bank.exception.EntityNotFoundException;
+import bank.mapper.TransactionMapper;
+import bank.model.Transaction;
+import bank.repository.UserRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+public class TransactionServiceTest {
+
+
+    @Mock
+    private UserRepository userRepositoryMock;
+    @Mock
+    private TransactionMapper transactionMapperMock;
+
+    @InjectMocks
+    private TransactionServiceImpl transactionService;
+
+
+    @Test
+    void testGetBankAccountTransactions() {
+
+        int expectedSize = 1;
+
+        long bankAccountId = 1L,
+                transactionId = 1L;
+        LocalDateTime transactionDate = LocalDateTime.now();
+        double moneyAmount = 1000D;
+        String transactionMsg = "Transaction Msg";
+        String transactionType = "Transaction Type";
+        Transaction transaction = Transaction.builder()
+                .id(transactionId)
+                .type(transactionType)
+                .msg(transactionMsg)
+                .moneyAmount(moneyAmount)
+                .transactionDate(transactionDate)
+                .build();
+        TransactionResponseDto transactionResponseDto = TransactionResponseDto.builder()
+                .id(transactionId)
+                .msg(transactionMsg)
+                .moneyAmount(moneyAmount)
+                .type(transactionType)
+                .transactionDate(transactionDate.toString())
+                .build();
+        List<Transaction> transactions = List.of(transaction);
+        List<TransactionResponseDto> transactionResponseDtos = List.of(transactionResponseDto);
+
+        when(userRepositoryMock.findTransactionsByBankAccountId(bankAccountId)).thenReturn(transactions);
+        when(transactionMapperMock.mapEntityListToResponseDtoList(transactions)).thenReturn(transactionResponseDtos);
+
+        List<TransactionResponseDto> bankAccountTransactions = transactionService.getBankAccountTransactions(bankAccountId);
+
+        verify(userRepositoryMock, times(1)).findTransactionsByBankAccountId(bankAccountId);
+        verify(transactionMapperMock, times(1)).mapEntityListToResponseDtoList(transactions);
+
+        assertEquals(expectedSize, bankAccountTransactions.size());
+        assertEquals(transactionResponseDtos, bankAccountTransactions);
+        assertEquals(transactionId, bankAccountTransactions.get(0).getId());
+
+    }
+
+    @Test
+    void testClearBankAccountTransactions() {
+
+        long bankAccountId = 1L;
+        when(userRepositoryMock.deleteTransactionsByBankAccountId(bankAccountId)).thenReturn(true);
+        assertDoesNotThrow(() -> transactionService.clearBankAccountTransactions(bankAccountId));
+        verify(userRepositoryMock, times(1)).deleteTransactionsByBankAccountId(bankAccountId);
+    }
+
+    @Test
+    void testClearBankAccountTransactions_noTransactions() {
+
+        long bankAccountId = 1L;
+        when(userRepositoryMock.deleteTransactionsByBankAccountId(bankAccountId)).thenReturn(false);
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> transactionService.clearBankAccountTransactions(bankAccountId)
+        );
+        verify(userRepositoryMock, times(1)).deleteTransactionsByBankAccountId(bankAccountId);
+    }
+
+}

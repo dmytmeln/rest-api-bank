@@ -1,209 +1,454 @@
-//package bank.service.serviceImpl;
-//
-//import bank.mapper.UserMapper;
-//import bank.model.User;
-//import bank.dto.UserForm;
-//import jakarta.persistence.EntityExistsException;
-//import jakarta.persistence.EntityNotFoundException;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.ArgumentCaptor;
-//import org.mockito.Captor;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//
-//import java.util.Optional;
-//
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.Mockito.*;
-//
-//@ExtendWith(MockitoExtension.class)
-//public class UserServiceTest {
-//
-//    @Mock
-//    private UserRepository userRepoMock;
-//    @Mock
-//    private UserMapper userMapperMock;
-//
-//    @InjectMocks
-//    private UserServiceImpl userService;
-//
-//    @Captor
-//    private ArgumentCaptor<User> userCaptor;
-//
-//    private User user;
-//
-//    private UserForm userForm;
-//
-//    @BeforeEach
-//    void init() {
-//        user = User.builder()
-//                .firstname("John")
-//                .lastname("Doe")
-//                .password("12!@asAS")
-//                .email("john.doe@example.com")
-//                .phoneNumber("123123123123")
-//                .build();
-//
-//        userForm = UserForm.builder()
-//                .firstname("UpdatedFirstName")
-//                .lastname("UpdatedLastName")
-//                .phoneNumber("123123123123")
-//                .password("12!@asAS")
-//                .email("john.doe@example.com")
-//                .build();
-//    }
-//
-//    @Test
-//    void testValidFindById() {
-//        long id = 1L;
-//        user.setId(id);
-//        when(userRepoMock.findById(id)).thenReturn(Optional.ofNullable(user));
-//
-//        User foundUser = userService.findById(id);
-//
-//        assertEquals(user, foundUser);
-//    }
-//
-//    @Test
-//    void testInvalidFindById() {
-//        assertThrows(EntityNotFoundException.class, () -> userService.findById(1L));
-//    }
-//
-//    @Test
-//    void testSignupTest() {
-//
-//        String email = user.getEmail();
-//        String phoneNumber = user.getPhoneNumber();
-//        long expectedId = 2;
-//
-//        when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(false);
-//        when(userRepoMock.save(any(User.class))).thenAnswer(invocationOnMock -> {
-//            User userToSave = invocationOnMock.getArgument(0);
-//            userToSave.setId(expectedId);
-//            return userToSave;
-//        });
-//        when(userMapperMock.mapToUser(userForm)).thenReturn(user);
-//
-//        User signupUser = userService.signup(userForm);
-//        Long actualId = signupUser.getId();
-//
-//        when(userRepoMock.findById(actualId)).thenReturn(Optional.of(signupUser));
-//
-//        User savedUser = userService.findById(actualId);
-//
-//        verify(userRepoMock, times(1)).save(userCaptor.capture());
-//        verify(userRepoMock, times(1)).findById(actualId);
-//
-//        assertEquals(expectedId, actualId);
-//        assertEquals(user, savedUser);
-//
-//    }
-//
-//    @Test
-//    void testSignupExistingUserTest() {
-//        String email = user.getEmail();
-//        String phoneNumber = user.getPhoneNumber();
-//
-//        when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(true);
-//
-//        assertThrows(EntityExistsException.class, () -> userService.signup(userForm));
-//        verify(userRepoMock, times(1)).existsByEmailOrPhoneNumber(email, phoneNumber);
-//    }
-//
-//
-//    @Test
-//    void testUpdateTest() {
-//        long id = 1L;
-//
-//        String email = "email@gmail.com";
-//        String phoneNumber = "380981258958";
-//        userForm.setEmail(email);
-//        userForm.setPhoneNumber(phoneNumber);
-//
-//        when(userRepoMock.findById(id)).thenReturn(Optional.ofNullable(user));
-//        when(userRepoMock.existsByEmailAndPhoneNumber(email, phoneNumber)).thenReturn(false);
-//        when(userRepoMock.save(any(User.class))).thenAnswer(invocationOnMock -> {
-//            User userToSave = invocationOnMock.getArgument(0);
-//            return userToSave.toBuilder()
-//                    .id(id)
-//                    .email(userForm.getEmail())
-//                    .password(userForm.getPassword())
-//                    .phoneNumber(userForm.getPhoneNumber())
-//                    .firstname(userForm.getFirstname())
-//                    .lastname(userForm.getLastname())
-//                    .build();
-//        });
-//        when(userMapperMock.mapToUser(userForm)).thenReturn(user);
-//
-//        User updatedUser = userService.update(userForm, id);
-//
-//        verify(userRepoMock, times(1)).existsByEmailAndPhoneNumber(email, phoneNumber);
-//        verify(userRepoMock, times(1)).findById(id);
-//        verify(userRepoMock, times(1)).save(userCaptor.capture());
-//
-//        assertNotNull(updatedUser);
-//        assertEquals(userForm.getEmail(), updatedUser.getEmail());
-//        assertEquals(userCaptor.getValue().getId(), updatedUser.getId());
-//
-//    }
-//
-//    @Test
-//    void testUpdateNonExistingUserTest() {
-//        long id = 1L;
-//        assertThrows(EntityNotFoundException.class, () -> userService.update(new UserForm(), id));
-//    }
-//
-//    @Test
-//    void testUpdateWithAlreadyExistingEmailAndPhoneNumber() {
-//        long id = 1L;
-//        String email = "email@gmail.com";
-//        String phoneNumber = "380981258958";
-//        userForm.setEmail(email);
-//        userForm.setPhoneNumber(phoneNumber);
-//
-//        user.setId(id);
-//        when(userRepoMock.findById(id)).thenReturn(Optional.ofNullable(user));
-//        when(userRepoMock.existsByEmailAndPhoneNumber(email, phoneNumber)).thenReturn(true);
-//
-//        assertThrows(EntityExistsException.class, () -> userService.update(userForm, id));
-//    }
-//
-//    @Test
-//    void testUpdateWithAlreadyExistingEmail() {
-//        long id = 1L;
-//        String email = "email@gmail.com";
-//        userForm.setEmail(email);
-//
-//        user.setId(id);
-//        when(userRepoMock.findById(id)).thenReturn(Optional.ofNullable(user));
-//        when(userRepoMock.existsByEmail(email)).thenReturn(true);
-//
-//        assertThrows(EntityExistsException.class, () -> userService.update(userForm, id));
-//    }
-//
-//    @Test
-//    void testUpdateWithAlreadyExistingPhoneNumber() {
-//        long id = 1L;
-//        String phoneNumber = "380981258958";
-//        userForm.setPhoneNumber(phoneNumber);
-//
-//        user.setId(id);
-//        when(userRepoMock.findById(id)).thenReturn(Optional.ofNullable(user));
-//        when(userRepoMock.existsByPhoneNumber(phoneNumber)).thenReturn(true);
-//
-//        assertThrows(EntityExistsException.class, () -> userService.update(userForm, id));
-//    }
-//
-//    @Test
-//    void testDeleteNonexistentUser() {
-//        long id = 1L;
-//        when(userRepoMock.existsById(id)).thenReturn(false);
-//
-//        assertThrows(EntityNotFoundException.class, () -> userService.delete(id));
-//    }
-//
-//}
+package bank.service.serviceImpl;
+
+import bank.dto.user.UserRequestDto;
+import bank.dto.user.UserResponseDto;
+import bank.exception.EntityNotFoundException;
+import bank.mapper.UserMapper;
+import bank.model.Role;
+import bank.model.User;
+import bank.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+public class UserServiceTest {
+
+    @Mock
+    private UserRepository userRepoMock;
+    @Mock
+    private UserMapper userMapperMock;
+    @InjectMocks
+    private UserServiceImpl userService;
+
+    private User user;
+
+    @BeforeEach
+    void init() {
+        user = User.builder()
+                .firstname("John")
+                .lastname("Doe")
+                .password("12!@asAS")
+                .email("john.doe@example.com")
+                .phoneNumber("123123123123")
+                .role(Role.ROLE_USER)
+                .build();
+    }
+
+    @Test
+    void testFindById_valid() {
+        Long id = 1L;
+        user.setId(id);
+        when(userRepoMock.findById(id)).thenReturn(Optional.ofNullable(user));
+
+        User foundUser = userService.findById(id);
+
+        assertEquals(user, foundUser);
+    }
+
+    @Test
+    void testFindById_invalid() {
+        Long userId = 1L;
+        when(userRepoMock.findById(userId)).thenThrow(new EntityNotFoundException());
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> userService.findById(userId)
+        );
+    }
+
+    @Test
+    void testFindResponseById() {
+
+        Long userId = 1L;
+        long bankAccountId = 1L;
+        UserResponseDto userResponseDto = UserResponseDto.builder()
+                .id(userId)
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(user.getPhoneNumber())
+                .email(user.getEmail())
+                .role("ROLE_USER")
+                .bankAccountsId(Set.of(bankAccountId))
+                .build();
+
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userMapperMock.mapToResponseDto(user)).thenReturn(userResponseDto);
+
+        UserResponseDto actualUserResponseDto = userService.findResponseById(userId);
+
+        assertEquals(userResponseDto, actualUserResponseDto);
+
+    }
+
+    @Test
+    void testFindResponseById_nonExistingUser() {
+        Long userId = -1L;
+        when(userRepoMock.findById(userId)).thenReturn(Optional.empty());
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> userService.findResponseById(userId)
+        );
+    }
+
+    @Test
+    void testExistsByEmailOrPhoneNumber_existingUser() {
+        String email = user.getEmail();
+        String phoneNumber = user.getPhoneNumber();
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .phoneNumber(phoneNumber)
+                .email(email)
+                .build();
+
+        when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(true);
+
+        boolean existsByEmailOrPhoneNumber = userService.existsByEmailOrPhoneNumber(userRequestDto);
+
+        assertTrue(existsByEmailOrPhoneNumber);
+    }
+
+    @Test
+    void testExistsByEmailOrPhoneNumber_nonExistingUser() {
+        String email = user.getEmail();
+        String phoneNumber = user.getPhoneNumber();
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .phoneNumber(phoneNumber)
+                .email(email)
+                .build();
+
+        when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(false);
+
+        boolean existsByEmailOrPhoneNumber = userService.existsByEmailOrPhoneNumber(userRequestDto);
+
+        assertFalse(existsByEmailOrPhoneNumber);
+    }
+
+    @Test
+    void testSignupTest() {
+
+        long expectedId = 2;
+        String email = user.getEmail();
+        String phoneNumber = user.getPhoneNumber();
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .password(user.getPassword())
+                .email(email)
+                .build();
+        UserResponseDto userResponseDto = UserResponseDto.builder()
+                .id(expectedId)
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .email(email)
+                .role("ROLE_USER")
+                .bankAccountsId(Set.of(expectedId))
+                .build();
+
+
+        when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(false);
+        when(userMapperMock.mapToEntity(userRequestDto)).thenReturn(user);
+        when(userRepoMock.save(user)).thenReturn(user);
+        when(userMapperMock.mapToResponseDto(user)).thenReturn(userResponseDto);
+
+        UserResponseDto signupUser = userService.signup(userRequestDto);
+        String actualEmail = signupUser.getEmail(),
+                actualPhoneNumber = signupUser.getPhoneNumber();
+        Long actualId = signupUser.getId();
+
+        verify(userRepoMock, times(1)).save(user);
+        verify(userRepoMock, times(1)).existsByEmailOrPhoneNumber(email, phoneNumber);
+        verify(userMapperMock, times(1)).mapToResponseDto(user);
+        verify(userMapperMock, times(1)).mapToEntity(userRequestDto);
+
+        assertEquals(expectedId, actualId);
+        assertEquals(email, actualEmail);
+        assertEquals(phoneNumber, actualPhoneNumber);
+        Set<Long> bankAccountsId = signupUser.getBankAccountsId();
+        assertFalse(bankAccountsId.isEmpty());
+        assertEquals(expectedId, bankAccountsId.iterator().next());
+
+    }
+
+    @Test
+    void testAlreadyExists_changedEmailAndPhoneNumber_doesntExist() {
+        String email = "email@gmail.com";
+        String phoneNumber = "380966666666";
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .password(user.getPassword())
+                .email(email)
+                .build();
+
+        long userId = 1L;
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(false);
+
+        boolean alreadyExists = userService.alreadyExists(userRequestDto, userId);
+
+        assertFalse(alreadyExists);
+
+    }
+
+    @Test
+    void testAlreadyExists_changedEmailAndPhoneNumber_alreadyExists() {
+        String email = "email@gmail.com";
+        String phoneNumber = "380966666666";
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .password(user.getPassword())
+                .email(email)
+                .build();
+
+        long userId = 1L;
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(true);
+
+        boolean alreadyExists = userService.alreadyExists(userRequestDto, userId);
+
+        assertTrue(alreadyExists);
+    }
+
+    @Test
+    void testAlreadyExists_changedEmail_doesntExist() {
+
+        String email = "email@gmail.com";
+        String phoneNumber = user.getPhoneNumber();
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .password(user.getPassword())
+                .email(email)
+                .build();
+
+        long userId = 1L;
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepoMock.existsByEmail(email)).thenReturn(false);
+
+        boolean alreadyExists = userService.alreadyExists(userRequestDto, userId);
+
+        assertFalse(alreadyExists);
+    }
+
+    @Test
+    void testAlreadyExists_changedEmail_alreadyExists() {
+
+        String email = "email@gmail.com";
+        String phoneNumber = user.getPhoneNumber();
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .password(user.getPassword())
+                .email(email)
+                .build();
+
+        long userId = 1L;
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepoMock.existsByEmail(email)).thenReturn(true);
+
+        boolean alreadyExists = userService.alreadyExists(userRequestDto, userId);
+
+        assertTrue(alreadyExists);
+    }
+
+    @Test
+    void testAlreadyExists_changedPhoneNumber_doesntExist() {
+        String email = user.getEmail();
+        String phoneNumber = "380966666666";
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .password(user.getPassword())
+                .email(email)
+                .build();
+
+        long userId = 1L;
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepoMock.existsByPhoneNumber(phoneNumber)).thenReturn(false);
+
+        boolean alreadyExists = userService.alreadyExists(userRequestDto, userId);
+
+        assertFalse(alreadyExists);
+    }
+
+    @Test
+    void testAlreadyExists_changedPhoneNumber_alreadyExists() {
+        String email = user.getEmail();
+        String phoneNumber = "380966666666";
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .password(user.getPassword())
+                .email(email)
+                .build();
+
+        long userId = 1L;
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepoMock.existsByPhoneNumber(phoneNumber)).thenReturn(true);
+
+        boolean alreadyExists = userService.alreadyExists(userRequestDto, userId);
+
+        assertTrue(alreadyExists);
+    }
+
+    @Test
+    void testUpdate_updateEmailAndPhoneNumber() {
+
+        long userId = 1L;
+        String email = "email@gmail.com";
+        String phoneNumber = "380966666666";
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .password(user.getPassword())
+                .email(email)
+                .build();
+        UserResponseDto userResponseDto = UserResponseDto.builder()
+                .id(userId)
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .email(email)
+                .build();
+
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(false);
+        when(userMapperMock.mapToEntity(userRequestDto)).thenReturn(user);
+        when(userRepoMock.updateWithoutBankAccount(user))
+                .thenAnswer(invocationOnMock -> {
+                    User userToUpdate = invocationOnMock.getArgument(0);
+                    userToUpdate.setEmail(email);
+                    userToUpdate.setPhoneNumber(phoneNumber);
+                    userToUpdate.setId(userId);
+                    return true;
+                });
+        when(userMapperMock.mapToResponseDto(user)).thenReturn(userResponseDto);
+
+        UserResponseDto actualResponseDto = userService.update(userRequestDto, userId);
+
+        assertEquals(userResponseDto, actualResponseDto);
+        assertEquals(email, user.getEmail());
+        assertEquals(phoneNumber, user.getPhoneNumber());
+        assertEquals(userId, user.getId());
+
+    }
+
+    @Test
+    void testUpdate_updateEmail() {
+
+        long userId = 1L;
+        String email = "email@gmail.com";
+        String phoneNumber = user.getPhoneNumber();
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .password(user.getPassword())
+                .email(email)
+                .build();
+        UserResponseDto userResponseDto = UserResponseDto.builder()
+                .id(userId)
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .email(email)
+                .build();
+
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepoMock.existsByEmail(email)).thenReturn(false);
+        when(userMapperMock.mapToEntity(userRequestDto)).thenReturn(user);
+        when(userRepoMock.updateWithoutBankAccount(user))
+                .thenAnswer(invocationOnMock -> {
+                    User userToUpdate = invocationOnMock.getArgument(0);
+                    userToUpdate.setEmail(email);
+                    userToUpdate.setPhoneNumber(phoneNumber);
+                    userToUpdate.setId(userId);
+                    return true;
+                });
+        when(userMapperMock.mapToResponseDto(user)).thenReturn(userResponseDto);
+
+        UserResponseDto actualResponseDto = userService.update(userRequestDto, userId);
+
+        assertEquals(userResponseDto, actualResponseDto);
+        assertEquals(email, user.getEmail());
+        assertEquals(userId, user.getId());
+
+    }
+
+    @Test
+    void testUpdate_updatePhoneNumber() {
+
+        long userId = 1L;
+        String email = user.getEmail();
+        String phoneNumber = "380966666666";
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .password(user.getPassword())
+                .email(email)
+                .build();
+        UserResponseDto userResponseDto = UserResponseDto.builder()
+                .id(userId)
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .email(email)
+                .build();
+
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepoMock.existsByPhoneNumber(phoneNumber)).thenReturn(false);
+        when(userMapperMock.mapToEntity(userRequestDto)).thenReturn(user);
+        when(userRepoMock.updateWithoutBankAccount(user))
+                .thenAnswer(invocationOnMock -> {
+                    User userToUpdate = invocationOnMock.getArgument(0);
+                    userToUpdate.setEmail(email);
+                    userToUpdate.setPhoneNumber(phoneNumber);
+                    userToUpdate.setId(userId);
+                    return true;
+                });
+        when(userMapperMock.mapToResponseDto(user)).thenReturn(userResponseDto);
+
+        UserResponseDto actualResponseDto = userService.update(userRequestDto, userId);
+
+        assertEquals(userResponseDto, actualResponseDto);
+        assertEquals(phoneNumber, user.getPhoneNumber());
+        assertEquals(userId, user.getId());
+
+    }
+
+    @Test
+    void testDelete_valid() {
+        long userId = 1L;
+        when(userRepoMock.existsById(userId)).thenReturn(true);
+
+        assertDoesNotThrow(() -> userService.delete(userId));
+    }
+
+    @Test
+    void testDelete_invalid() {
+        long id = 1L;
+        when(userRepoMock.existsById(id)).thenReturn(false);
+
+        assertThrows(EntityNotFoundException.class, () -> userService.delete(id));
+    }
+
+}

@@ -1,7 +1,6 @@
-DROP TABLE IF EXISTS user_bank_account;
-DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS transactions;
 DROP TABLE IF EXISTS bank_accounts;
+DROP TABLE IF EXISTS users;
 
 CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
@@ -15,17 +14,11 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS bank_accounts (
     id BIGSERIAL PRIMARY KEY,
-    balance DOUBLE PRECISION NOT NULL DEFAULT 0
-);
-
-CREATE TABLE IF NOT EXISTS user_bank_account (
     users BIGINT NOT NULL,
-    bank_account BIGINT NOT NULL,
+    users_key BIGINT NOT NULL,
+    balance DOUBLE PRECISION NOT NULL DEFAULT 0,
 
-    FOREIGN KEY (users) REFERENCES users(id),
-    FOREIGN KEY (bank_account) REFERENCES bank_accounts(id),
-
-    PRIMARY KEY (users, bank_account)
+    FOREIGN KEY (users) REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS transactions (
@@ -40,4 +33,4 @@ CREATE TABLE IF NOT EXISTS transactions (
     FOREIGN KEY (bank_accounts) REFERENCES bank_accounts(id)
 );
 
-ALTER TABLE user_bank_account DROP CONSTRAINT user_bank_account_bank_account_fkey;
+ALTER TABLE transactions DROP CONSTRAINT transactions_bank_accounts_fkey;
