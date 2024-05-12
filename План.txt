@@ -2,9 +2,9 @@
 
 2. Postgres +
 
-3. JWT Token Security +
+3. JWT Token Security
 
 4. Rest API Controllers
 
 План на завтра:
-Rest API Controllers (User, Bank, Transaction)
+Configure Role Access -> Rest API Controllers (User, Bank, Transaction)
