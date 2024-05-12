@@ -17,7 +17,6 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final UserRepository userRepository;
     private final TransactionMapper transactionMapper;
-    private final BankService bankService;
 
     @Override
     public List<TransactionResponseDto> getBankAccountTransactions(Long bankAccountId) {
