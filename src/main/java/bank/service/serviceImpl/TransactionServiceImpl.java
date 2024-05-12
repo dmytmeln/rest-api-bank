@@ -30,6 +30,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (!userRepository.deleteTransactionsByBankAccountId(bankAccountId)) {
             throw new EntityNotFoundException(
                     "Either Bank Account with ID [%d] doesn't exists or there is no any transaction for that account"
+                            .formatted(bankAccountId)
             );
         }
     }
