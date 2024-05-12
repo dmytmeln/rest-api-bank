@@ -2,7 +2,6 @@ package bank.service.serviceImpl;
 
 import bank.dto.user.UserRequestDto;
 import bank.dto.user.UserResponseDto;
-import bank.exception.EntityAlreadyExistsException;
 import bank.exception.EntityNotFoundException;
 import bank.mapper.UserMapper;
 import bank.model.Role;
