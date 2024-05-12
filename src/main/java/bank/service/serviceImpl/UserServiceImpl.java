@@ -118,6 +118,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean hasBankAccount(User user, Long bankAccountId) {
+        return user.getBankAccounts().stream()
+                .anyMatch(bankAccount -> Objects.equals(bankAccountId, bankAccount.getId()));
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepo.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException(
