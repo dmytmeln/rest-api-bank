@@ -38,21 +38,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void existsByEmailOrPhoneNumber(UserRequestDto userRequestDto) {
-        String email = userRequestDto.getEmail(),
-                phoneNumber = userRequestDto.getPhoneNumber();
-        boolean existsByEmailOrPhoneNumber = userRepo.existsByEmailOrPhoneNumber(email, phoneNumber);
-        if (existsByEmailOrPhoneNumber) {
-            throw new EntityAlreadyExistsException(
-                    "User with email [%s] and phone number [%s] already exists!".formatted(email, phoneNumber)
-            );
-        }
+    public boolean existsByEmailOrPhoneNumber(UserRequestDto userRequestDto) {
+        return userRepo.existsByEmailOrPhoneNumber(userRequestDto.getEmail(), userRequestDto.getPhoneNumber());
     }
 
     @Override
     @Transactional
     public UserResponseDto signup(UserRequestDto userRequestDto) {
-        existsByEmailOrPhoneNumber(userRequestDto);
+
+        if (existsByEmailOrPhoneNumber(userRequestDto)) {
+            throw new EntityAlreadyExistsException(
+                    "User with email [%s] and phone number [%s] already exists!"
+                            .formatted(userRequestDto.getEmail(), userRequestDto.getPhoneNumber())
+            );
+        }
 
         User user = userMapper.mapToEntity(userRequestDto);
         user.addBankAccount(BankAccount.builder().balance(0D).build()); // automatically create bank account for user
@@ -62,7 +61,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void alreadyExists(UserRequestDto userRequestDto, Long userId) {
+    public boolean alreadyExists(UserRequestDto userRequestDto, Long userId) {
 
         User userDB = findById(userId);
 
@@ -76,36 +75,29 @@ public class UserServiceImpl implements UserService {
         // if user changed both email and phone number -> check whether user with such info already exists
         if (!sameEmail && !samePhoneNumber) {
 
-            if (userRepo.existsByEmailAndPhoneNumber(email, phoneNumber)) {
-                throw new EntityAlreadyExistsException(
-                        "User with email [%s] and phone number [%s] already exists!".formatted(email, phoneNumber)
-                );
-            }
-
+            return userRepo.existsByEmailOrPhoneNumber(email, phoneNumber);
         } else if (!sameEmail) { // if userForm change only email -> check whether user with such email already exists
 
-            if (userRepo.existsByEmail(email)) {
-                throw new EntityAlreadyExistsException(
-                        "User with email [%s] already exists!".formatted(email)
-                );
-            }
-
+            return userRepo.existsByEmail(email);
         } else if (!samePhoneNumber) { //if userForm change only phone number -> check whether user with such phone number already exists
 
-            if (userRepo.existsByPhoneNumber(phoneNumber)) {
-                throw new EntityAlreadyExistsException(
-                        "User with phone number [%s] already exists!".formatted(phoneNumber)
-                );
-            }
-
+            return userRepo.existsByPhoneNumber(phoneNumber);
         }
+
+        return false;
 
     }
 
     @Override
     @Transactional
     public UserResponseDto update(UserRequestDto userRequestDto, Long userId) {
-        alreadyExists(userRequestDto, userId);
+
+        if (alreadyExists(userRequestDto, userId)) {
+            throw new EntityAlreadyExistsException(
+                    "User with email [%s] and/or phone number [%s] already exists!"
+                            .formatted(userRequestDto.getEmail(), userRequestDto.getPhoneNumber())
+            );
+        }
 
         User user = userMapper.mapToEntity(userRequestDto);
         user.setId(userId);

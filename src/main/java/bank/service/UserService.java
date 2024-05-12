@@ -17,8 +17,8 @@ public interface UserService extends UserDetailsService {
 
     UserResponseDto update(UserRequestDto user, Long userId);
 
-    void alreadyExists(UserRequestDto user, Long userId);
+    boolean alreadyExists(UserRequestDto user, Long userId);
 
-    void existsByEmailOrPhoneNumber(UserRequestDto userRequestDto);
+    boolean existsByEmailOrPhoneNumber(UserRequestDto userRequestDto);
 
 }
