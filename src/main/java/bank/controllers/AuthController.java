@@ -1,40 +1,53 @@
-//package bank.controllers;
-//
-//import bank.dto.user.UserForm;
-//import bank.service.UserService;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.ui.Model;
-//import org.springframework.validation.BindingResult;
-//import org.springframework.validation.annotation.Validated;
-//import org.springframework.web.bind.annotation.GetMapping;
-//import org.springframework.web.bind.annotation.ModelAttribute;
-//import org.springframework.web.bind.annotation.PostMapping;
-//import org.springframework.web.bind.annotation.RequestMapping;
-//
-//@Controller
-//@RequestMapping("/register")
-//@RequiredArgsConstructor
-//public class AuthController {
-//
-//    private final UserService userService;
-//    private final String SIGNUP_PAGE = "auth-signup";
-//
-//    @GetMapping
-//    public String showSignup(Model model) {
-//        model.addAttribute("userForm", new UserForm());
-//        return SIGNUP_PAGE;
-//    }
-//
-//    @PostMapping
-//    public String signupUser(@ModelAttribute @Validated UserForm userForm, BindingResult bindingResult) {
-//        if (bindingResult.hasErrors()) {
-//            return SIGNUP_PAGE;
-//        }
-//
-//        userService.signup(userForm);
-//        return "redirect:/login";
-//    }
-//
-//
-//}
+package bank.controllers;
+
+import bank.dto.auth.AuthResponse;
+import bank.dto.auth.LoginRequest;
+import bank.dto.user.UserRequestDto;
+import bank.model.User;
+import bank.service.UserService;
+import bank.util.JwtUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtils;
+
+    @PostMapping("/register")
+    public ResponseEntity<?> signupUser(@RequestBody @Validated UserRequestDto userRequestDto) {
+        return ResponseEntity.ok(userService.signup(userRequestDto));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody @Validated LoginRequest loginRequest) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+            );
+            User user = (User) authentication.getPrincipal();
+            String jwtToken = jwtUtils.generateTokenFromUsername(user.getUsername());
+            AuthResponse authResponse = new AuthResponse(user.getUsername(), jwtToken);
+            return ResponseEntity.ok().body(authResponse);
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+
+
+}
