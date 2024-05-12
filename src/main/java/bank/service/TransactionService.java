@@ -8,6 +8,6 @@ public interface TransactionService {
 
     List<TransactionResponseDto> getBankAccountTransactions(Long bankAccountId);
 
-    boolean clearBankAccountTransactions(Long bankAccountId);
+    void clearBankAccountTransactions(Long bankAccountId);
 
 }

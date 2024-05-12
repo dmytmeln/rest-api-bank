@@ -1,6 +1,7 @@
 package bank.service.serviceImpl;
 
 import bank.dto.transaction.TransactionResponseDto;
+import bank.exception.EntityNotFoundException;
 import bank.mapper.TransactionMapper;
 import bank.model.Transaction;
 import bank.repository.UserRepository;
@@ -13,8 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -76,15 +76,21 @@ public class TransactionServiceTest {
     void testClearBankAccountTransactions() {
 
         long bankAccountId = 1L;
-
         when(userRepositoryMock.deleteTransactionsByBankAccountId(bankAccountId)).thenReturn(true);
-
-        boolean hasCleared = transactionService.clearBankAccountTransactions(bankAccountId);
-
+        assertDoesNotThrow(() -> transactionService.clearBankAccountTransactions(bankAccountId));
         verify(userRepositoryMock, times(1)).deleteTransactionsByBankAccountId(bankAccountId);
+    }
 
-        assertTrue(hasCleared);
+    @Test
+    void testClearBankAccountTransactions_noTransactions() {
 
+        long bankAccountId = 1L;
+        when(userRepositoryMock.deleteTransactionsByBankAccountId(bankAccountId)).thenReturn(false);
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> transactionService.clearBankAccountTransactions(bankAccountId)
+        );
+        verify(userRepositoryMock, times(1)).deleteTransactionsByBankAccountId(bankAccountId);
     }
 
 }

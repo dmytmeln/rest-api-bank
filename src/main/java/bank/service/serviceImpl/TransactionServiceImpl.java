@@ -1,6 +1,7 @@
 package bank.service.serviceImpl;
 
 import bank.dto.transaction.TransactionResponseDto;
+import bank.exception.EntityNotFoundException;
 import bank.mapper.TransactionMapper;
 import bank.repository.UserRepository;
 import bank.service.BankService;
@@ -16,6 +17,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final UserRepository userRepository;
     private final TransactionMapper transactionMapper;
+    private final BankService bankService;
 
     @Override
     public List<TransactionResponseDto> getBankAccountTransactions(Long bankAccountId) {
@@ -26,8 +28,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public boolean clearBankAccountTransactions(Long bankAccountId) {
-        return userRepository.deleteTransactionsByBankAccountId(bankAccountId);
+    public void clearBankAccountTransactions(Long bankAccountId) {
+        if (!userRepository.deleteTransactionsByBankAccountId(bankAccountId)) {
+            throw new EntityNotFoundException(
+                    "Either Bank Account with ID [%d] doesn't exists or there is no any transaction for that account"
+            );
+        }
     }
 
 }

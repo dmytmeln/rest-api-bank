@@ -1,6 +1,7 @@
 package bank;
 
 import bank.dto.transaction.TransactionResponseDto;
+import bank.exception.EntityNotFoundException;
 import bank.service.TransactionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,11 +41,20 @@ public class TransactionIntegrationTest {
 
     @Test
     public void testClearBankAccountTransactions() {
-        boolean hasCleared = transactionService.clearBankAccountTransactions(realBankAccountId);
-        List<TransactionResponseDto> bankAccountTransactions = transactionService.getBankAccountTransactions(realBankAccountId);
 
-        assertTrue(hasCleared);
+        assertDoesNotThrow(() -> transactionService.clearBankAccountTransactions(realBankAccountId));
+
+        List<TransactionResponseDto> bankAccountTransactions = transactionService.getBankAccountTransactions(realBankAccountId);
         assertTrue(bankAccountTransactions.isEmpty());
+    }
+
+    @Test
+    public void testClearBankAccountTransactions_noBankAccount() {
+        long nonExistingBankAccountId = -1L;
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> transactionService.clearBankAccountTransactions(nonExistingBankAccountId)
+        );
     }
 
 }
