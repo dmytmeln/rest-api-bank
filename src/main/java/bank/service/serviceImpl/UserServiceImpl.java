@@ -25,17 +25,6 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
-    public void delete(long userId) {
-        if (!userRepo.existsById(userId)) {
-            throw new EntityNotFoundException(
-                    "User with  userId [%d] not found".formatted(userId)
-            );
-        }
-
-        userRepo.deleteById(userId);
-    }
-
-    @Override
     public User findById(Long userId) {
         return userRepo.findById(userId)
                 .orElseThrow(
@@ -45,7 +34,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto findResponseById(Long userId) {
-        return null;
+        return userMapper.mapToResponseDto(findById(userId));
     }
 
     @Override
@@ -123,6 +112,17 @@ public class UserServiceImpl implements UserService {
         userRepo.updateWithoutBankAccount(user);
 
         return userMapper.mapToResponseDto(findById(userId));
+    }
+
+    @Override
+    public void delete(long userId) {
+        if (!userRepo.existsById(userId)) {
+            throw new EntityNotFoundException(
+                    "User with  userId [%d] not found".formatted(userId)
+            );
+        }
+
+        userRepo.deleteById(userId);
     }
 
     @Override

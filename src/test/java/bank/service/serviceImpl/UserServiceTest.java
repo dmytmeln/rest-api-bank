@@ -67,6 +67,40 @@ public class UserServiceTest {
     }
 
     @Test
+    void testFindResponseById() {
+
+        Long userId = 1L;
+        long bankAccountId = 1L;
+        UserResponseDto userResponseDto = UserResponseDto.builder()
+                .id(userId)
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(user.getPhoneNumber())
+                .email(user.getEmail())
+                .role("ROLE_USER")
+                .bankAccountsId(Set.of(bankAccountId))
+                .build();
+
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userMapperMock.mapToResponseDto(user)).thenReturn(userResponseDto);
+
+        UserResponseDto actualUserResponseDto = userService.findResponseById(userId);
+
+        assertEquals(userResponseDto, actualUserResponseDto);
+
+    }
+
+    @Test
+    void testFindResponseById_nonExistingUser() {
+        Long userId = -1L;
+        when(userRepoMock.findById(userId)).thenReturn(Optional.empty());
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> userService.findResponseById(userId)
+        );
+    }
+
+    @Test
     void testExistsByEmailOrPhoneNumber_valid() {
         String email = user.getEmail();
         String phoneNumber = user.getPhoneNumber();
