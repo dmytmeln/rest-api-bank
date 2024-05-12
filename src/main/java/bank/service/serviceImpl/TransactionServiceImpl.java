@@ -4,7 +4,6 @@ import bank.dto.transaction.TransactionResponseDto;
 import bank.exception.EntityNotFoundException;
 import bank.mapper.TransactionMapper;
 import bank.repository.UserRepository;
-import bank.service.BankService;
 import bank.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
