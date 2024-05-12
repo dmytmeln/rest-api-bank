@@ -101,38 +101,35 @@ public class UserServiceTest {
     }
 
     @Test
-    void testExistsByEmailOrPhoneNumber_valid() {
+    void testExistsByEmailOrPhoneNumber_existingUser() {
         String email = user.getEmail();
         String phoneNumber = user.getPhoneNumber();
         UserRequestDto userRequestDto = UserRequestDto.builder()
-                .firstname(user.getFirstname())
-                .lastname(user.getLastname())
                 .phoneNumber(phoneNumber)
-                .password(user.getPassword())
-                .email(email)
-                .build();
-
-        when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(false);
-        assertDoesNotThrow(() -> userService.existsByEmailOrPhoneNumber(userRequestDto));
-    }
-
-    @Test
-    void testExistsByEmailOrPhoneNumber_invalid() {
-        String email = user.getEmail();
-        String phoneNumber = user.getPhoneNumber();
-        UserRequestDto userRequestDto = UserRequestDto.builder()
-                .firstname(user.getFirstname())
-                .lastname(user.getLastname())
-                .phoneNumber(phoneNumber)
-                .password(user.getPassword())
                 .email(email)
                 .build();
 
         when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(true);
-        assertThrows(
-                EntityAlreadyExistsException.class,
-                () -> userService.existsByEmailOrPhoneNumber(userRequestDto)
-        );
+
+        boolean existsByEmailOrPhoneNumber = userService.existsByEmailOrPhoneNumber(userRequestDto);
+
+        assertTrue(existsByEmailOrPhoneNumber);
+    }
+
+    @Test
+    void testExistsByEmailOrPhoneNumber_nonExistingUser() {
+        String email = user.getEmail();
+        String phoneNumber = user.getPhoneNumber();
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .phoneNumber(phoneNumber)
+                .email(email)
+                .build();
+
+        when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(false);
+
+        boolean existsByEmailOrPhoneNumber = userService.existsByEmailOrPhoneNumber(userRequestDto);
+
+        assertFalse(existsByEmailOrPhoneNumber);
     }
 
     @Test
@@ -197,9 +194,12 @@ public class UserServiceTest {
 
         long userId = 1L;
         when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepoMock.existsByEmailAndPhoneNumber(email, phoneNumber)).thenReturn(false);
+        when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(false);
 
-        assertDoesNotThrow(() -> userService.alreadyExists(userRequestDto, userId));
+        boolean alreadyExists = userService.alreadyExists(userRequestDto, userId);
+
+        assertFalse(alreadyExists);
+
     }
 
     @Test
@@ -216,16 +216,16 @@ public class UserServiceTest {
 
         long userId = 1L;
         when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepoMock.existsByEmailAndPhoneNumber(email, phoneNumber)).thenReturn(true);
+        when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(true);
 
-        assertThrows(
-                EntityAlreadyExistsException.class,
-                () -> userService.alreadyExists(userRequestDto, userId)
-        );
+        boolean alreadyExists = userService.alreadyExists(userRequestDto, userId);
+
+        assertTrue(alreadyExists);
     }
 
     @Test
     void testAlreadyExists_changedEmail_doesntExist() {
+
         String email = "email@gmail.com";
         String phoneNumber = user.getPhoneNumber();
         UserRequestDto userRequestDto = UserRequestDto.builder()
@@ -240,11 +240,14 @@ public class UserServiceTest {
         when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
         when(userRepoMock.existsByEmail(email)).thenReturn(false);
 
-        assertDoesNotThrow(() -> userService.alreadyExists(userRequestDto, userId));
+        boolean alreadyExists = userService.alreadyExists(userRequestDto, userId);
+
+        assertFalse(alreadyExists);
     }
 
     @Test
     void testAlreadyExists_changedEmail_alreadyExists() {
+
         String email = "email@gmail.com";
         String phoneNumber = user.getPhoneNumber();
         UserRequestDto userRequestDto = UserRequestDto.builder()
@@ -259,10 +262,9 @@ public class UserServiceTest {
         when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
         when(userRepoMock.existsByEmail(email)).thenReturn(true);
 
-        assertThrows(
-                EntityAlreadyExistsException.class,
-                () -> userService.alreadyExists(userRequestDto, userId)
-        );
+        boolean alreadyExists = userService.alreadyExists(userRequestDto, userId);
+
+        assertTrue(alreadyExists);
     }
 
     @Test
@@ -281,7 +283,9 @@ public class UserServiceTest {
         when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
         when(userRepoMock.existsByPhoneNumber(phoneNumber)).thenReturn(false);
 
-        assertDoesNotThrow(() -> userService.alreadyExists(userRequestDto, userId));
+        boolean alreadyExists = userService.alreadyExists(userRequestDto, userId);
+
+        assertFalse(alreadyExists);
     }
 
     @Test
@@ -300,10 +304,9 @@ public class UserServiceTest {
         when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
         when(userRepoMock.existsByPhoneNumber(phoneNumber)).thenReturn(true);
 
-        assertThrows(
-                EntityAlreadyExistsException.class,
-                () -> userService.alreadyExists(userRequestDto, userId)
-        );
+        boolean alreadyExists = userService.alreadyExists(userRequestDto, userId);
+
+        assertTrue(alreadyExists);
     }
 
     @Test
@@ -328,7 +331,7 @@ public class UserServiceTest {
                 .build();
 
         when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepoMock.existsByEmailAndPhoneNumber(email, phoneNumber)).thenReturn(false);
+        when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(false);
         when(userMapperMock.mapToEntity(userRequestDto)).thenReturn(user);
         when(userRepoMock.updateWithoutBankAccount(user))
                 .thenAnswer(invocationOnMock -> {
