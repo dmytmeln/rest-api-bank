@@ -16,13 +16,13 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#user.id, #bankAccountId)")
+    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#user.id, #bankAccountId) != null")
     public ResponseEntity<?> getBankAccountTransactions(@AuthenticationPrincipal User user, @PathVariable Long bankAccountId) {
         return ResponseEntity.ok().body(transactionService.getBankAccountTransactions(bankAccountId));
     }
 
     @DeleteMapping
-    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#user.id, #bankAccountId)")
+    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#user.id, #bankAccountId) != null")
     public ResponseEntity<?> clearBankAccountTransactions(@AuthenticationPrincipal User user, @PathVariable Long bankAccountId) {
 
         transactionService.clearBankAccountTransactions(bankAccountId);
