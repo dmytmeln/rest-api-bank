@@ -1,33 +1,32 @@
-//package bank.controllers;
-//
-//import bank.model.BankAccount;
-//import bank.model.User;
-//import bank.service.BankService;
-//import bank.service.TransactionService;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.security.core.annotation.AuthenticationPrincipal;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.ui.Model;
-//import org.springframework.web.bind.annotation.GetMapping;
-//import org.springframework.web.bind.annotation.RequestMapping;
-//import org.springframework.web.bind.annotation.SessionAttribute;
-//
-//@Controller
-//@RequestMapping("/transactions")
-//@RequiredArgsConstructor
-//public class TransactionController {
-//
-//    private final TransactionService transactionService;
-//    private final BankService bankService;
-//
-//    private final String TRANSACTION_PAGE = "transactions";
-//
-//    @GetMapping
-//    public String getTransactionPage(@AuthenticationPrincipal User user, Model model) {
-//        BankAccount bankAccount = bankService.findBankAccountByUserId(user.getId());
-//        model.addAttribute("transactions", transactionService.getBankAccountTransactions(bankAccount.getId()));
-//
-//        return TRANSACTION_PAGE;
-//    }
-//
-//}
+package bank.controllers;
+
+import bank.model.User;
+import bank.service.TransactionService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/bank/{bankAccountId}/transactions")
+@RequiredArgsConstructor
+public class TransactionController {
+
+    private final TransactionService transactionService;
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN') OR @userServiceImpl.hasBankAccount(#user, #bankAccountId)")
+    public ResponseEntity<?> getBankAccountTransactions(@AuthenticationPrincipal User user, @PathVariable Long bankAccountId) {
+        return ResponseEntity.ok().body(transactionService.getBankAccountTransactions(bankAccountId));
+    }
+
+    @DeleteMapping
+    @PreAuthorize("hasRole('ADMIN') OR @userServiceImpl.hasBankAccount(#user, #bankAccountId)")
+    public ResponseEntity<?> clearBankAccountTransactions(@AuthenticationPrincipal User user, @PathVariable Long bankAccountId) {
+
+        transactionService.clearBankAccountTransactions(bankAccountId);
+        return ResponseEntity.noContent().build();
+    }
+
+}

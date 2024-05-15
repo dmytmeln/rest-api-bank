@@ -1,7 +1,10 @@
-1. Spring Data JDBC
+1. Spring Data JDBC +
 
-2. Postgress
+2. Postgres +
 
-3. REST API
+3. JWT Token Security
 
-4. JWT Token Security
+4. Rest API Controllers
+
+План на завтра:
+Configure Role Access -> Rest API Controllers (User, Bank, Transaction)

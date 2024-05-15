@@ -21,4 +21,6 @@ public interface UserService extends UserDetailsService {
 
     boolean existsByEmailOrPhoneNumber(UserRequestDto userRequestDto);
 
+    boolean hasBankAccount(User user, Long bankAccountId);
+
 }

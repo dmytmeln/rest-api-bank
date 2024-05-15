@@ -1,61 +1,70 @@
-//package bank.controllers;
-//
-//import bank.dto.TransactionForm;
-//import bank.model.User;
-//import bank.service.BankService;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.security.core.annotation.AuthenticationPrincipal;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.ui.Model;
-//import org.springframework.validation.BindingResult;
-//import org.springframework.validation.annotation.Validated;
-//import org.springframework.web.bind.annotation.*;
-//
-//@Controller("BankController")
-//@RequestMapping("/bank")
-//@RequiredArgsConstructor
-//public class BankController {
-//
-//    private final BankService bankService;
-//
-//    private final String BANK_PAGE = "bank";
-//
-//    @GetMapping
-//    public String showBank(@AuthenticationPrincipal User user, Model model) {
-//        model.addAttribute("account", bankService.findBankAccountByUserId(user.getId()));
-//        model.addAttribute("transactionFormW", new TransactionForm());
-//        model.addAttribute("transactionFormD", new TransactionForm());
-//        return BANK_PAGE;
-//    }
-//
-//    @PostMapping("deposit/{accountId}")
-//    public String makeDeposit(
-//            @PathVariable Long accountId, Model model,
-//            @ModelAttribute("transactionFormD") @Validated TransactionForm transactionForm, BindingResult bindingResult
-//    ) {
-//        if (bindingResult.hasErrors()) {
-//            model.addAttribute("account", bankService.findById(accountId));
-//            model.addAttribute("transactionFormW", new TransactionForm());
-//            return BANK_PAGE;
-//        }
-//
-//        bankService.makeDeposit(accountId, transactionForm);
-//        return "redirect:/bank";
-//    }
-//
-//    @PostMapping("withdrawal/{accountId}")
-//    public String makeWithdrawal(
-//            @PathVariable Long accountId, Model model,
-//            @ModelAttribute("transactionFormW") @Validated TransactionForm transactionForm, BindingResult bindingResult
-//    ) {
-//        if (bindingResult.hasErrors()) {
-//            model.addAttribute("account", bankService.findById(accountId));
-//            model.addAttribute("transactionFormD", new TransactionForm());
-//            return BANK_PAGE;
-//        }
-//
-//        bankService.makeWithdrawal(accountId, transactionForm);
-//        return "redirect:/bank";
-//    }
-//
-//}
+package bank.controllers;
+
+import bank.dto.bank.BankResponseDto;
+import bank.dto.transaction.TransactionRequestDto;
+import bank.model.User;
+import bank.service.BankService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
+
+@RestController
+@RequestMapping("/api/banks")
+@RequiredArgsConstructor
+public class BankController {
+
+    private final BankService bankService;
+
+    @PostMapping
+    public ResponseEntity<?> create(@AuthenticationPrincipal User user) {
+
+        BankResponseDto bankResponseDto = bankService.creteBankAccountForUser(user.getId());
+
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{bankAccountId}")
+                .buildAndExpand(bankResponseDto.getId())
+                .toUri();
+
+        return ResponseEntity.created(uri).body(bankResponseDto);
+    }
+
+    @GetMapping("/{bankAccountId}")
+    @PreAuthorize("hasRole('ADMIN') OR @userServiceImpl.hasBankAccount(#user, #bankAccountId)")
+    public ResponseEntity<?> findById(@AuthenticationPrincipal User user, @PathVariable Long bankAccountId) {
+        return ResponseEntity.ok().body(bankService.findBankResponseById(bankAccountId, user.getId()));
+    }
+
+    @PostMapping("/{bankAccountId}/deposit")
+    @PreAuthorize("hasRole('ADMIN') OR @userServiceImpl.hasBankAccount(#user, #bankAccountId)")
+    public ResponseEntity<?> makeDeposit(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long bankAccountId,
+            @RequestBody @Validated TransactionRequestDto transactionRequestDto
+    ) {
+        return ResponseEntity.ok().body(bankService.makeDeposit(bankAccountId, user.getId(), transactionRequestDto));
+    }
+
+    @PostMapping("/{bankAccountId}/withdrawal")
+    @PreAuthorize("hasRole('ADMIN') OR @userServiceImpl.hasBankAccount(#user, #bankAccountId)")
+    public ResponseEntity<?> makeWithdrawal(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long bankAccountId,
+            @RequestBody @Validated TransactionRequestDto transactionRequestDto
+    ) {
+        return ResponseEntity.ok().body(bankService.makeWithdrawal(bankAccountId, user.getId(), transactionRequestDto));
+    }
+
+    @DeleteMapping("/{bankAccountId}")
+    @PreAuthorize("hasRole('ADMIN') OR @userServiceImpl.hasBankAccount(#user, #bankAccountId)")
+    public ResponseEntity<?> delete(@AuthenticationPrincipal User user, @PathVariable Long bankAccountId) {
+        bankService.deleteBankAccount(bankAccountId, user.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+}

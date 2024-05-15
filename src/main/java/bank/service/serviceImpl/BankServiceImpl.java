@@ -29,7 +29,7 @@ public class BankServiceImpl implements BankService {
 
     @Override
     public BankAccount findById(Long accountId, Long userId) {
-        return userRepository.findBankAccountByBankAndUserIds(accountId, userId)
+        return userRepository.findBankAccountByBankAndUserIds(userId, accountId)
                 .orElseThrow(
                         () -> new EntityNotFoundException(
                                 "Account with id [%d] and/or user id [%d] not found!".formatted(accountId, userId)
@@ -135,7 +135,5 @@ public class BankServiceImpl implements BankService {
         return bankAccountMapper.mapToBankResponseDto(updatedUserBankAccount);
 
     }
-
-
 
 }
