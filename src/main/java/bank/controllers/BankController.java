@@ -41,7 +41,7 @@ public class BankController {
     }
 
     @PostMapping("/{bankAccountId}/deposit")
-    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#user.id, #bankAccountId)")
+    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#user.id, #bankAccountId) != null")
     public ResponseEntity<?> makeDeposit(
             @AuthenticationPrincipal User user,
             @PathVariable Long bankAccountId,
@@ -61,7 +61,7 @@ public class BankController {
     }
 
     @DeleteMapping("/{bankAccountId}")
-    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#user.id, #bankAccountId)")
+    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#user.id, #bankAccountId) != null")
     public ResponseEntity<?> delete(@AuthenticationPrincipal User user, @PathVariable Long bankAccountId) {
         bankService.deleteBankAccount(bankAccountId, user.getId());
         return ResponseEntity.noContent().build();
