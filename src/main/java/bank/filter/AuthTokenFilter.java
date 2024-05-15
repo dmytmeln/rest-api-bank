@@ -52,7 +52,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     }
 
     private void setAuthenticationContext(String token, HttpServletRequest request) {
-        UserDetails userDetails = getUserDetails(token);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(jwtUtil.getSubject(token));
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 userDetails,
                 null,
@@ -61,10 +61,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
-
-    private UserDetails getUserDetails(String token) {
-        return userDetailsService.loadUserByUsername(jwtUtil.getSubject(token));
     }
 
 }
