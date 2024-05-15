@@ -155,7 +155,7 @@ public class UserRepositoryTest {
                         existingPhoneNumber,
                         nonExistingPass
                 )
-                .orElseThrow(RuntimeException::new);
+                .orElse(null);
 
         assertNull(user);
     }
