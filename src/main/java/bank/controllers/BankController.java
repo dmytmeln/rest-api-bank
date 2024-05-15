@@ -35,13 +35,13 @@ public class BankController {
     }
 
     @GetMapping("/{bankAccountId}")
-    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#user.id, #bankAccountId)")
+    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#bankAccountId, #user.id)")
     public ResponseEntity<?> findById(@AuthenticationPrincipal User user, @PathVariable Long bankAccountId) {
         return ResponseEntity.ok().body(bankService.findBankResponseById(bankAccountId, user.getId()));
     }
 
     @PostMapping("/{bankAccountId}/deposit")
-    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#user.id, #bankAccountId)")
+    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#bankAccountId, #user.id)")
     public ResponseEntity<?> makeDeposit(
             @AuthenticationPrincipal User user,
             @PathVariable Long bankAccountId,
@@ -51,7 +51,7 @@ public class BankController {
     }
 
     @PostMapping("/{bankAccountId}/withdrawal")
-    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#user.id, #bankAccountId)")
+    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#bankAccountId, #user.id)")
     public ResponseEntity<?> makeWithdrawal(
             @AuthenticationPrincipal User user,
             @PathVariable Long bankAccountId,
@@ -61,7 +61,7 @@ public class BankController {
     }
 
     @DeleteMapping("/{bankAccountId}")
-    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#user.id, #bankAccountId)")
+    @PreAuthorize("hasRole('ADMIN') OR @bankServiceImpl.findById(#bankAccountId, #user.id)")
     public ResponseEntity<?> delete(@AuthenticationPrincipal User user, @PathVariable Long bankAccountId) {
         bankService.deleteBankAccount(bankAccountId, user.getId());
         return ResponseEntity.noContent().build();
