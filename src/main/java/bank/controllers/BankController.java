@@ -15,7 +15,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/api/bank")
+@RequestMapping("/api/banks")
 @RequiredArgsConstructor
 public class BankController {
 
@@ -58,6 +58,13 @@ public class BankController {
             @RequestBody @Validated TransactionRequestDto transactionRequestDto
     ) {
         return ResponseEntity.ok().body(bankService.makeWithdrawal(bankAccountId, user.getId(), transactionRequestDto));
+    }
+
+    @DeleteMapping("/{bankAccountId}")
+    @PreAuthorize("hasRole('ADMIN') OR @userServiceImpl.hasBankAccount(#user, #bankAccountId)")
+    public ResponseEntity<?> delete(@AuthenticationPrincipal User user, @PathVariable Long bankAccountId) {
+        bankService.deleteBankAccount(bankAccountId, user.getId());
+        return ResponseEntity.noContent().build();
     }
 
 }
