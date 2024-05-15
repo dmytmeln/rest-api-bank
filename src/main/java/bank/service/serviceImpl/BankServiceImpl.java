@@ -32,7 +32,7 @@ public class BankServiceImpl implements BankService {
         return userRepository.findBankAccountByBankAndUserIds(userId, accountId)
                 .orElseThrow(
                         () -> new EntityNotFoundException(
-                                "Account with id [%d] and/or user id [%d] not found!".formatted(accountId, userId)
+                                "Either Bank Account with id [%d] not found or you're not the owner of this account!".formatted(accountId)
                         )
                 );
     }
