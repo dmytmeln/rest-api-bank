@@ -28,8 +28,8 @@ public class BankServiceImpl implements BankService {
     private final TransactionMapper transactionMapper;
 
     @Override
-    public BankAccount findById(Long accountId, Long userId) {
-        return userRepository.findBankAccountByBankAndUserIds(userId, accountId)
+    public BankAccount findById(Long userId, Long accountId) {
+         return userRepository.findBankAccountByBankAndUserIds(userId, accountId)
                 .orElseThrow(
                         () -> new EntityNotFoundException(
                                 "Either Bank Account with id [%d] not found or you're not the owner of this account!".formatted(accountId)
@@ -38,8 +38,8 @@ public class BankServiceImpl implements BankService {
     }
 
     @Override
-    public BankResponseDto findBankResponseById(Long accountId, Long userId) {
-        BankAccount bankAccount = findById(accountId, userId);
+    public BankResponseDto findBankResponseById(Long userId, Long accountId) {
+        BankAccount bankAccount = findById(userId, accountId);
         return bankAccountMapper.mapToBankResponseDto(bankAccount);
     }
 
@@ -59,7 +59,7 @@ public class BankServiceImpl implements BankService {
 
     @Override
     public boolean deleteBankAccount(Long accountId, Long userId) {
-        findById(accountId, userId);
+        findById(userId, accountId);
         return userRepository.deleteBankAccountWithoutUser(accountId);
     }
 
