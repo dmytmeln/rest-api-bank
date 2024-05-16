@@ -8,10 +8,11 @@ import bank.mapper.UserMapper;
 import bank.model.Role;
 import bank.model.User;
 import bank.repository.UserRepository;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,8 +31,8 @@ public class UserServiceTest {
     @Mock
     private UserMapper userMapperMock;
     @Mock
-    private PasswordEncoder passwordEncoder;
-    @InjectMocks
+    private PasswordEncoder passwordEncoderMock;
+    private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
     private UserServiceImpl userService;
 
     private User user;
@@ -46,6 +47,8 @@ public class UserServiceTest {
                 .phoneNumber("123123123123")
                 .role(Role.ROLE_USER)
                 .build();
+
+        userService = new UserServiceImpl(userRepoMock, userMapperMock, passwordEncoderMock, validator);
     }
 
     @Test
@@ -515,7 +518,7 @@ public class UserServiceTest {
     void testPatchUpdate_updateEmailThatAlreadyExists() {
 
         long userId = 1L;
-        String email = user.getEmail();
+        String email = "nonExistingEmail@gmail.com";
         UserRequestDto userRequestDto = UserRequestDto.builder()
                 .email(email)
                 .build();
@@ -527,6 +530,7 @@ public class UserServiceTest {
                 EntityAlreadyExistsException.class,
                 () -> userService.patchUpdate(userRequestDto, userId)
         );
+
     }
 
     @Test
