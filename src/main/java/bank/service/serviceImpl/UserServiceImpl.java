@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
         if (existsByEmailOrPhoneNumber(userRequestDto)) {
             throw new EntityAlreadyExistsException(
-                    "User with email [%s] and phone number [%s] already exists!"
+                    "User with email [%s] and/or phone number [%s] already exists!"
                             .formatted(userRequestDto.getEmail(), userRequestDto.getPhoneNumber())
             );
         }
