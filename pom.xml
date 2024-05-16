@@ -23,6 +23,9 @@
         <maven.compiler.release>17</maven.compiler.release>
         <java.version>17</java.version>
         <postgres.version> 42.7.3</postgres.version>
+        <modelmapper.version>3.2.0</modelmapper.version>
+        <swagger-ui.version>2.5.0</swagger-ui.version>
+        <jsonwebtoken.version>0.11.5</jsonwebtoken.version>
     </properties>
 
     <dependencies>
@@ -47,22 +50,28 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${swagger-ui.version}</version>
+        </dependency>
+
         <!-- JWT related libraries: -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>0.11.5</version>
+            <version>${jsonwebtoken.version}</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.11.5</version>
+            <version>${jsonwebtoken.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
-            <version>0.11.5</version>
+            <version>${jsonwebtoken.version}</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -94,7 +103,7 @@
         <dependency>
             <groupId>org.modelmapper</groupId>
             <artifactId>modelmapper</artifactId>
-            <version>3.2.0</version>
+            <version>${modelmapper.version}</version>
         </dependency>
 
     </dependencies>
@@ -118,7 +127,6 @@
 
             </plugins>
         </pluginManagement>
-
     </build>
 
 </project>

@@ -2,17 +2,20 @@ package bank.service.serviceImpl;
 
 import bank.dto.user.UserRequestDto;
 import bank.dto.user.UserResponseDto;
+import bank.exception.EntityAlreadyExistsException;
 import bank.exception.EntityNotFoundException;
 import bank.mapper.UserMapper;
 import bank.model.Role;
 import bank.model.User;
 import bank.repository.UserRepository;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 import java.util.Set;
@@ -27,7 +30,9 @@ public class UserServiceTest {
     private UserRepository userRepoMock;
     @Mock
     private UserMapper userMapperMock;
-    @InjectMocks
+    @Mock
+    private PasswordEncoder passwordEncoderMock;
+    private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
     private UserServiceImpl userService;
 
     private User user;
@@ -42,6 +47,8 @@ public class UserServiceTest {
                 .phoneNumber("123123123123")
                 .role(Role.ROLE_USER)
                 .build();
+
+        userService = new UserServiceImpl(userRepoMock, userMapperMock, passwordEncoderMock, validator);
     }
 
     @Test
@@ -428,6 +435,131 @@ public class UserServiceTest {
         when(userMapperMock.mapToResponseDto(user)).thenReturn(userResponseDto);
 
         UserResponseDto actualResponseDto = userService.update(userRequestDto, userId);
+
+        assertEquals(userResponseDto, actualResponseDto);
+        assertEquals(phoneNumber, user.getPhoneNumber());
+        assertEquals(userId, user.getId());
+
+    }
+
+    @Test
+    void testPatchUpdate_updateEmailAndPhoneNumber() {
+
+        long userId = 1L;
+        String email = "email@gmail.com";
+        String phoneNumber = "380966666666";
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .phoneNumber(phoneNumber)
+                .email(email)
+                .build();
+        UserResponseDto userResponseDto = UserResponseDto.builder()
+                .id(userId)
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .email(email)
+                .build();
+
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepoMock.existsByEmail(email)).thenReturn(false);
+        when(userRepoMock.existsByPhoneNumber(phoneNumber)).thenReturn(false);
+        when(userRepoMock.updateWithoutBankAccount(user))
+                .thenAnswer(invocationOnMock -> {
+                    User userToUpdate = invocationOnMock.getArgument(0);
+                    userToUpdate.setId(userId);
+                    return true;
+                });
+        when(userMapperMock.mapToResponseDto(user)).thenReturn(userResponseDto);
+
+        UserResponseDto actualResponseDto = userService.patchUpdate(userRequestDto, userId);
+
+        assertEquals(userResponseDto, actualResponseDto);
+        assertEquals(email, user.getEmail());
+        assertEquals(phoneNumber, user.getPhoneNumber());
+        assertEquals(userId, user.getId());
+
+    }
+
+    @Test
+    void testPatchUpdate_updateEmail() {
+
+        long userId = 1L;
+        String email = "email@gmail.com";
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .email(email)
+                .build();
+        UserResponseDto userResponseDto = UserResponseDto.builder()
+                .id(userId)
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(user.getPhoneNumber())
+                .email(email)
+                .build();
+
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepoMock.existsByEmail(email)).thenReturn(false);
+        when(userRepoMock.updateWithoutBankAccount(user))
+                .thenAnswer(invocationOnMock -> {
+                    User userToUpdate = invocationOnMock.getArgument(0);
+                    userToUpdate.setId(userId);
+                    return true;
+                });
+        when(userMapperMock.mapToResponseDto(user)).thenReturn(userResponseDto);
+
+        UserResponseDto actualResponseDto = userService.patchUpdate(userRequestDto, userId);
+
+        assertEquals(userResponseDto, actualResponseDto);
+        assertEquals(email, user.getEmail());
+        assertEquals(userId, user.getId());
+
+    }
+
+    @Test
+    void testPatchUpdate_updateEmailThatAlreadyExists() {
+
+        long userId = 1L;
+        String email = "nonExistingEmail@gmail.com";
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .email(email)
+                .build();
+
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepoMock.existsByEmail(email)).thenReturn(true);
+
+        assertThrows(
+                EntityAlreadyExistsException.class,
+                () -> userService.patchUpdate(userRequestDto, userId)
+        );
+
+    }
+
+    @Test
+    void testPatchUpdate_updatePhoneNumber() {
+
+        long userId = 1L;
+        String phoneNumber = "380966666666";
+        UserRequestDto userRequestDto = UserRequestDto.builder()
+                .phoneNumber(phoneNumber)
+                .build();
+        UserResponseDto userResponseDto = UserResponseDto.builder()
+                .id(userId)
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .phoneNumber(phoneNumber)
+                .email(user.getEmail())
+                .build();
+
+        when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepoMock.existsByPhoneNumber(phoneNumber)).thenReturn(false);
+        when(userRepoMock.updateWithoutBankAccount(user))
+                .thenAnswer(invocationOnMock -> {
+                    User userToUpdate = invocationOnMock.getArgument(0);
+                    userToUpdate.setId(userId);
+                    return true;
+                });
+        when(userMapperMock.mapToResponseDto(user)).thenReturn(userResponseDto);
+
+        UserResponseDto actualResponseDto = userService.patchUpdate(userRequestDto, userId);
 
         assertEquals(userResponseDto, actualResponseDto);
         assertEquals(phoneNumber, user.getPhoneNumber());

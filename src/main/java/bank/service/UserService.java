@@ -4,8 +4,12 @@ import bank.dto.user.UserResponseDto;
 import bank.model.User;
 import bank.dto.user.UserRequestDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface UserService extends UserDetailsService {
+
+    @Transactional
+    UserResponseDto patchUpdate(UserRequestDto userRequestDto, Long userId);
 
     void delete(long userId);
 

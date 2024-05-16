@@ -9,9 +9,11 @@ import bank.model.BankAccount;
 import bank.model.User;
 import bank.repository.UserRepository;
 import bank.service.UserService;
+import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepo;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final Validator validator;
 
     @Override
     public User findById(Long userId) {
@@ -48,7 +52,7 @@ public class UserServiceImpl implements UserService {
 
         if (existsByEmailOrPhoneNumber(userRequestDto)) {
             throw new EntityAlreadyExistsException(
-                    "User with email [%s] and phone number [%s] already exists!"
+                    "User with email [%s] and/or phone number [%s] already exists!"
                             .formatted(userRequestDto.getEmail(), userRequestDto.getPhoneNumber())
             );
         }
@@ -104,6 +108,69 @@ public class UserServiceImpl implements UserService {
         userRepo.updateWithoutBankAccount(user);
 
         return userMapper.mapToResponseDto(findById(userId));
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDto patchUpdate(UserRequestDto userRequestDto, Long userId) {
+
+        User user = findById(userId);
+        String firstname = userRequestDto.getFirstname(),
+                lastname = userRequestDto.getLastname(),
+                email = userRequestDto.getEmail(),
+                password = userRequestDto.getPassword(),
+                phoneNumber = userRequestDto.getPhoneNumber();
+
+        int expectedErrors = 5;
+
+        if (email != null) {
+            if (!email.equals(user.getEmail()) && userRepo.existsByEmail(email)) {
+                throw new EntityAlreadyExistsException(
+                        "User with email [%s] already exists!".formatted(email)
+                );
+            }
+
+            expectedErrors--;
+            user.setEmail(email);
+        }
+
+        if (phoneNumber != null) {
+            if (!phoneNumber.equals(user.getPhoneNumber()) && userRepo.existsByPhoneNumber(phoneNumber)) {
+                throw new EntityAlreadyExistsException(
+                        "User with email [%s] and/or phone number [%s] already exists!"
+                                .formatted(userRequestDto.getEmail(), userRequestDto.getPhoneNumber())
+                );
+            }
+
+            expectedErrors--;
+            user.setPhoneNumber(phoneNumber);
+        }
+
+        if (firstname != null) {
+            expectedErrors--;
+            user.setFirstname(firstname);
+        }
+
+        if (lastname != null) {
+            expectedErrors--;
+            user.setLastname(lastname);
+        }
+
+        if (password != null) {
+            expectedErrors--;
+            user.setPassword(passwordEncoder.encode(password));
+        }
+
+        // for example, if 2 fields was changed -> 3 errors are expected (because of fields that are unset)
+        var constraintViolations = validator.validate(userRequestDto);
+        if (constraintViolations.size() != expectedErrors) {
+            throw new IllegalArgumentException("Constraint violations for given fields");
+        }
+
+        userRepo.updateWithoutBankAccount(user);
+
+        return userMapper.mapToResponseDto(user);
+
     }
 
     @Override

@@ -10,6 +10,7 @@ import bank.model.Transaction;
 import bank.model.User;
 import bank.repository.UserRepository;
 import bank.service.BankService;
+import bank.service.TransactionService;
 import bank.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,22 +25,23 @@ public class BankServiceImpl implements BankService {
 
     private final UserRepository userRepository;
     private final UserService userService;
+    private final TransactionService transactionService;
     private final BankAccountMapper bankAccountMapper;
     private final TransactionMapper transactionMapper;
 
     @Override
-    public BankAccount findById(Long accountId, Long userId) {
-        return userRepository.findBankAccountByBankAndUserIds(userId, accountId)
+    public BankAccount findById(Long userId, Long accountId) {
+         return userRepository.findBankAccountByBankAndUserIds(userId, accountId)
                 .orElseThrow(
                         () -> new EntityNotFoundException(
-                                "Account with id [%d] and/or user id [%d] not found!".formatted(accountId, userId)
+                                "Either Bank Account with id [%d] not found or you're not the owner of this account!".formatted(accountId)
                         )
                 );
     }
 
     @Override
-    public BankResponseDto findBankResponseById(Long accountId, Long userId) {
-        BankAccount bankAccount = findById(accountId, userId);
+    public BankResponseDto findBankResponseById(Long userId, Long accountId) {
+        BankAccount bankAccount = findById(userId, accountId);
         return bankAccountMapper.mapToBankResponseDto(bankAccount);
     }
 
@@ -59,7 +61,11 @@ public class BankServiceImpl implements BankService {
 
     @Override
     public boolean deleteBankAccount(Long accountId, Long userId) {
-        findById(accountId, userId);
+        BankAccount bankAccount = findById(userId, accountId);
+        if (!bankAccount.getTransactions().isEmpty()) {
+            transactionService.clearBankAccountTransactions(accountId);
+        }
+
         return userRepository.deleteBankAccountWithoutUser(accountId);
     }
 

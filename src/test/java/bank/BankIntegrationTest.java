@@ -35,7 +35,7 @@ public class BankIntegrationTest {
     public void testFindById() {
         Double expectedBalance = 1000D;
 
-        BankAccount bankAccount = bankService.findById(realBankAccountId, realUserId);
+        BankAccount bankAccount = bankService.findById(realUserId, realBankAccountId);
 
         assertNotNull(bankAccount);
         assertEquals(realUserId, bankAccount.getId());
@@ -49,7 +49,7 @@ public class BankIntegrationTest {
 
         assertThrows(
                 EntityNotFoundException.class,
-                () -> bankService.findById(nonExistingBankAccountId, nonExistingUserId)
+                () -> bankService.findById(nonExistingUserId, nonExistingBankAccountId)
         );
     }
 
@@ -57,7 +57,7 @@ public class BankIntegrationTest {
     public void testFindBankResponseById() {
         Double expectedBalance = 1000D;
 
-        BankResponseDto bankResponseDto = bankService.findBankResponseById(realBankAccountId, realUserId);
+        BankResponseDto bankResponseDto = bankService.findBankResponseById(realUserId, realBankAccountId);
 
         assertNotNull(bankResponseDto);
         assertEquals(realUserId, bankResponseDto.getId());
@@ -83,7 +83,7 @@ public class BankIntegrationTest {
         assertTrue(hasDeleted);
         assertThrows(
                 EntityNotFoundException.class,
-                () -> bankService.findById(realBankAccountId, realUserId)
+                () -> bankService.findById(realUserId, realBankAccountId)
         );
 
     }

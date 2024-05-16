@@ -6,9 +6,9 @@ import bank.model.BankAccount;
 
 public interface BankService {
 
-    BankAccount findById(Long accountId, Long userId);
+    BankAccount findById(Long userId, Long accountId);
 
-    BankResponseDto findBankResponseById(Long accountId, Long userId);
+    BankResponseDto findBankResponseById(Long userId, Long accountId);
 
     BankResponseDto creteBankAccountForUser(Long userId);
 
