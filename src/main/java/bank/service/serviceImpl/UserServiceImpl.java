@@ -12,6 +12,7 @@ import bank.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepo;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public User findById(Long userId) {
@@ -104,6 +106,54 @@ public class UserServiceImpl implements UserService {
         userRepo.updateWithoutBankAccount(user);
 
         return userMapper.mapToResponseDto(findById(userId));
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDto patchUpdate(UserRequestDto userRequestDto, Long userId) {
+        User user = findById(userId);
+        String firstname = userRequestDto.getFirstname(),
+                lastname = userRequestDto.getLastname(),
+                email = userRequestDto.getEmail(),
+                password = userRequestDto.getPassword(),
+                phoneNumber = userRequestDto.getPhoneNumber();
+
+
+        if (email != null && !email.isBlank()) {
+            if (existsByEmailOrPhoneNumber(userRequestDto)) {
+                throw new EntityAlreadyExistsException(
+                        "User with email [%s] and/or phone number [%s] already exists!"
+                                .formatted(userRequestDto.getEmail(), userRequestDto.getPhoneNumber())
+                );
+            }
+            user.setEmail(email);
+        }
+
+        if (phoneNumber != null && !phoneNumber.isBlank()) {
+            if (existsByEmailOrPhoneNumber(userRequestDto)) {
+                throw new EntityAlreadyExistsException(
+                        "User with email [%s] and/or phone number [%s] already exists!"
+                                .formatted(userRequestDto.getEmail(), userRequestDto.getPhoneNumber())
+                );
+            }
+            user.setPhoneNumber(phoneNumber);
+        }
+
+        if (firstname != null && !firstname.isBlank()) {
+            user.setFirstname(firstname);
+        }
+
+        if (lastname != null && !lastname.isBlank()) {
+            user.setLastname(lastname);
+        }
+
+        if (password != null && !password.isBlank()) {
+            user.setPassword(passwordEncoder.encode(password));
+        }
+
+        userRepo.updateWithoutBankAccount(user);
+
+        return userMapper.mapToResponseDto(user);
     }
 
     @Override
