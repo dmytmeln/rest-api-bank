@@ -10,6 +10,8 @@ import org.modelmapper.TypeMap;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,7 +25,7 @@ public class TransactionMapperImpl implements TransactionMapper {
         this.modelMapper = modelMapper;
 
         Converter<LocalDateTime, String> localDateTimeStringConverter =
-                converter -> converter.getSource().toString();
+                converter -> converter.getSource().format(DateTimeFormatter.ofPattern("d-M-uuuu H:m:s"));
         this.typeMap = modelMapper.createTypeMap(Transaction.class, TransactionResponseDto.class)
                 .addMappings(
                         mapper -> mapper.using(localDateTimeStringConverter).map(Transaction::getTransactionDate, TransactionResponseDto::setTransactionDate)
