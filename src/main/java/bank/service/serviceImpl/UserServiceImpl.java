@@ -120,22 +120,24 @@ public class UserServiceImpl implements UserService {
 
 
         if (email != null && !email.isBlank()) {
-            if (existsByEmailOrPhoneNumber(userRequestDto)) {
+            if (userRepo.existsByEmail(email)) {
                 throw new EntityAlreadyExistsException(
                         "User with email [%s] and/or phone number [%s] already exists!"
                                 .formatted(userRequestDto.getEmail(), userRequestDto.getPhoneNumber())
                 );
             }
+
             user.setEmail(email);
         }
 
         if (phoneNumber != null && !phoneNumber.isBlank()) {
-            if (existsByEmailOrPhoneNumber(userRequestDto)) {
+            if (userRepo.existsByPhoneNumber(phoneNumber)) {
                 throw new EntityAlreadyExistsException(
                         "User with email [%s] and/or phone number [%s] already exists!"
                                 .formatted(userRequestDto.getEmail(), userRequestDto.getPhoneNumber())
                 );
             }
+
             user.setPhoneNumber(phoneNumber);
         }
 

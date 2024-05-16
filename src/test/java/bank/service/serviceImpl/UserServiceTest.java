@@ -438,7 +438,7 @@ public class UserServiceTest {
         assertEquals(userId, user.getId());
 
     }
-    // -------------------------------
+
     @Test
     void testPatchUpdate_updateEmailAndPhoneNumber() {
 
@@ -458,7 +458,8 @@ public class UserServiceTest {
                 .build();
 
         when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepoMock.existsByEmailOrPhoneNumber(email, phoneNumber)).thenReturn(false);
+        when(userRepoMock.existsByEmail(email)).thenReturn(false);
+        when(userRepoMock.existsByPhoneNumber(phoneNumber)).thenReturn(false);
         when(userRepoMock.updateWithoutBankAccount(user))
                 .thenAnswer(invocationOnMock -> {
                     User userToUpdate = invocationOnMock.getArgument(0);
@@ -493,7 +494,7 @@ public class UserServiceTest {
                 .build();
 
         when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepoMock.existsByEmailOrPhoneNumber(email, null)).thenReturn(false);
+        when(userRepoMock.existsByEmail(email)).thenReturn(false);
         when(userRepoMock.updateWithoutBankAccount(user))
                 .thenAnswer(invocationOnMock -> {
                     User userToUpdate = invocationOnMock.getArgument(0);
@@ -520,7 +521,7 @@ public class UserServiceTest {
                 .build();
 
         when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepoMock.existsByEmailOrPhoneNumber(email, null)).thenReturn(true);
+        when(userRepoMock.existsByEmail(email)).thenReturn(true);
 
         assertThrows(
                 EntityAlreadyExistsException.class,
@@ -545,7 +546,7 @@ public class UserServiceTest {
                 .build();
 
         when(userRepoMock.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepoMock.existsByEmailOrPhoneNumber(null, phoneNumber)).thenReturn(false);
+        when(userRepoMock.existsByPhoneNumber(phoneNumber)).thenReturn(false);
         when(userRepoMock.updateWithoutBankAccount(user))
                 .thenAnswer(invocationOnMock -> {
                     User userToUpdate = invocationOnMock.getArgument(0);
