@@ -10,6 +10,7 @@ import bank.model.Transaction;
 import bank.model.User;
 import bank.repository.UserRepository;
 import bank.service.BankService;
+import bank.service.TransactionService;
 import bank.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class BankServiceImpl implements BankService {
 
     private final UserRepository userRepository;
     private final UserService userService;
+    private final TransactionService transactionService;
     private final BankAccountMapper bankAccountMapper;
     private final TransactionMapper transactionMapper;
 
@@ -59,7 +61,11 @@ public class BankServiceImpl implements BankService {
 
     @Override
     public boolean deleteBankAccount(Long accountId, Long userId) {
-        findById(userId, accountId);
+        BankAccount bankAccount = findById(userId, accountId);
+        if (!bankAccount.getTransactions().isEmpty()) {
+            transactionService.clearBankAccountTransactions(accountId);
+        }
+
         return userRepository.deleteBankAccountWithoutUser(accountId);
     }
 
