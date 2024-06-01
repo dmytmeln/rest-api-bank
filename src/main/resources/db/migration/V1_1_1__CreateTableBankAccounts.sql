@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS bank_accounts (
+    id BIGSERIAL PRIMARY KEY,
+    users BIGINT NOT NULL,
+    users_key BIGINT NOT NULL,
+    balance DOUBLE PRECISION NOT NULL DEFAULT 0,
+
+    FOREIGN KEY (users) REFERENCES users(id)
+);
