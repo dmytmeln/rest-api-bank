@@ -12,7 +12,7 @@ Very simple banking application built with Spring Boot, designed to handle banki
   - **Spring Web**.
   - **Spring Security**.
   - **Spring Boot Test**.
-- **PostgreSQL.
+- **PostgreSQL**.
 - **Flyway**.
 - **ModelMapper**.
 - **Lombok**.
